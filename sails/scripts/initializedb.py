@@ -51,6 +51,11 @@ import issues
 
 import re
 import os
+
+from path import path
+
+
+DATA_DIR = path('data')
 reline = re.compile("[\\n\\r]")
 refield = re.compile("\\t")
 def dtab(fn = "sails_neele.tab", encoding = "utf-8"):
@@ -94,7 +99,7 @@ def paths(d):
     return l.union([(k,) + p for (k, v) in d.iteritems() if v for p in paths(v)])
 
 def loadunicode(fn, encoding = "utf-8"):
-    f = open(fn, "r")
+    f = open(DATA_DIR.joinpath(fn), "r")
     a = f.read()
     f.close()
     return unicode(a, encoding)
@@ -127,7 +132,7 @@ def main(args):
     lons = dict([(d['iso-639-3'], d['lon']) for d in dp])
     lats = dict([(d['iso-639-3'], d['lat']) for d in dp])
 
-    tabfns = [fn for fn in os.listdir(".") if fn.startswith("sails_") and fn.endswith(".tab")]
+    tabfns = [fn.basename() for fn in DATA_DIR.listdir('sails_*.tab')]
     print "Sheets found", tabfns
     ldps = [ld for fn in tabfns for ld in dtab(fn)]
     ldps = [dict([(k, v.replace(".", "-") if k in ['feature_alphanumid', 'value'] else v) for (k, v) in ld.iteritems()]) for ld in ldps]
@@ -273,17 +278,18 @@ def main(args):
     dataset = common.Dataset(
         id="SAILS",
         name='SAILS Online',
-        publisher_name="Radboud University",
-        publisher_place="Nijmegen",
-        publisher_url="http://www.ru.nl",
+        publisher_name="Max Planck Institute for Evolutionary Anthropology",
+        publisher_place="Leipzig",
+        publisher_url="http://www.eva.mpg.de",
         description="Dataset on Typological Features for South American Languages, collected 2009-2013 in the Traces of Contact Project (ERC Advanced Grant 230310) awarded to Pieter Muysken, Radboud Universiteit, Nijmegen, the Netherlands.",
-        domain='http://cls.ru.nl/staff/hhammarstrom/sails.html',
+        domain='sails.clld.org',
         published=date(2014, 2, 20),
         contact='harald.hammarstroem@mpi.nl',
         license='http://creativecommons.org/licenses/by-nc-nd/2.0/de/deed.en',
-        jsondata={
-            'license_icon': 'http://wals.info/static/images/cc_by_nc_nd.png',
-            'license_name': 'Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Germany'})
+        #jsondata={
+        #    'license_icon': 'http://wals.info/static/images/cc_by_nc_nd.png',
+        #    'license_name': 'Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Germany'}
+    )
     DBSession.add(dataset)
     DBSession.flush()
 
