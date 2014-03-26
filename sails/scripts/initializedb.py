@@ -1,13 +1,16 @@
 from __future__ import unicode_literals
 import sys
+import transaction
 
 from pytz import utc
 from datetime import date, datetime
 #import MySQLdb
 
-from clld.scripts.util import initializedb, Data
+from clld.scripts.util import initializedb, Data, gbs_func, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
+from clld.db.util import compute_language_sources
+from clld.lib.bibtex import EntryType, Record
 
 import sails
 from sails import models
@@ -17,10 +20,6 @@ import issues
 #http://cls.ru.nl/staff/hhammarstrom/sails.html
 #id=sails.__name__,
 #TODO sidebar
-#TODO sources,
-#TODO center map
-#TODO how to cite
-#TODO Domain ska vara choose-list
 #TODO de.description ocksa i sidebar under features
 #<dt>Legal Values and Meanings:</dt>
 #<dd>
@@ -54,7 +53,6 @@ import os
 
 from path import path
 
-
 DATA_DIR = path('data')
 reline = re.compile("[\\n\\r]")
 refield = re.compile("\\t")
@@ -64,6 +62,11 @@ def dtab(fn = "sails_neele.tab", encoding = "utf-8"):
     topline = lp[0]
     lpd = [dict(zip(topline, l)) for l in lp[1:]]
     return lpd
+
+def ktfbib(s):
+    rs = [z.split(":::") for z in s.split("|||")]
+    [k, typ] = rs[0]
+    return (k, (typ, dict(rs[1:])))
 
 def opv(d, func):
     n = {}
@@ -98,6 +101,14 @@ def paths(d):
     l = set([(k,) for (k, v) in d.iteritems() if not v])
     return l.union([(k,) + p for (k, v) in d.iteritems() if v for p in paths(v)])
 
+def rangify(ranges):
+    r = {}
+    n = 1
+    for (i, x) in enumerate(reversed(ranges)):
+        r[i] = n
+        n = n*x
+    return [r[i] for i in reversed(range(len(r)))]
+    
 def loadunicode(fn, encoding = "utf-8"):
     f = open(DATA_DIR.joinpath(fn), "r")
     a = f.read()
@@ -122,6 +133,7 @@ def treetxt(txt):
 def main(args):
     #http://clld.readthedocs.org/en/latest/extending.html
     data = Data(created=utc.localize(datetime(2013, 11, 15)), updated=utc.localize(datetime(2013, 12, 12)))
+    #fromdb=MySQLdb.connect(user="root", passwd="blodig1kuk", db="linc")
     icons = issues.Icons()
 
 
@@ -151,10 +163,17 @@ def main(args):
 
     DBSession.flush()
 
+    #Lgs
+    for lgid in lgs.iterkeys():
+        data.add(common.Identifier, lgid, name=lgid, type=common.IdentifierType.iso.value, description=lgs[lgid])
+    DBSession.flush()
 
     for lgid in lgs.iterkeys():
         lang = data.add(models.sailsLanguage, lgid, id = lgid, name = lgs[lgid], family=data["Family"][lg_to_fam[lgid]], representation = nfeatures[lgid], latitude = float(lats[lgid]), longitude = float(lons[lgid]))
+    DBSession.flush()
 
+    for lgid in lgs.iterkeys():
+        lang = data.add(common.LanguageIdentifier, lgid, language=data['sailsLanguage'][lgid], identifier=data['Identifier'][lgid], description="has iso-639-3 code")
     DBSession.flush()
 
     #Domains
@@ -190,8 +209,17 @@ def main(args):
         #        fnamefix[dfsid] = dfeature.replace("vs.", "versus").replace("Cf.", "Cf")
 
     nlgs = opv(grp2([(ld['feature_alphanumid'], ld['language_id']) for ld in ldps if ld["value"] != "?"]), len)
+    
+    redigit = re.compile('([0-9]+)')
+    fidstr = dict([(fid, '--'.join([c for c in redigit.split(fid) if not c.isdigit()])) for fid in fs.iterkeys()])
+    fidintdata = dict([(fid, [int(c) for c in redigit.split(fid) if c.isdigit()]) for fid in fs.iterkeys()])
+    #fidintrange = max([len(x) for x in fidintdata.itervalues()])
+    fidintranges = opv(grp2([(i, x) for ii in fidintdata.itervalues() for (i, x) in enumerate(ii)]), max)
+    rmul = rangify([fidintranges[i] for i in range(len(fidintranges))])
+    fidint = opv(fidintdata, lambda ii, rmul = rmul: sum([a*b for (a, b) in zip(ii, rmul)]))
     for (fid, f) in fs.iteritems():
-        param = data.add(models.Feature, fid, id=fid, name=fnamefix.get(fid, f['feature_name']), doc=f['feature_information'], vdoc=f['feature_possible_values'], representation=nlgs[fid], designer=data["Designer"][f['designer']], dependson = f["depends_on"], featuredomain = data['FeatureDomain'][f["feature_domain"]])
+        param = data.add(models.Feature, fid, id=fid, name=fnamefix.get(fid, f['feature_name']), doc=f['feature_information'], vdoc=f['feature_possible_values'], representation=nlgs[fid], designer=data["Designer"][f['designer']], dependson = f["depends_on"], featuredomain = data['FeatureDomain'][f["feature_domain"]], sortkey_str = fidstr[fid], sortkey_int = fidint[fid])
+
 
     #Families
     DBSession.flush()
@@ -242,13 +270,19 @@ def main(args):
         #)
         valueset = data.add(
             common.ValueSet,
-            ld['value'], # id=id_,
+            id_,
+            #ld['value'],
+            #name=ld['value'],
+            id=id_,
             language=language,
             parameter=parameter,
             contribution=parameter.designer
         )
         data.add(
-            models.sailsValue, ld['value'],
+            models.sailsValue,
+            id_,
+            #ld['value'],
+            #name=ld['value'],
             id=id_,
             domainelement=data['DomainElement'][(ld['feature_alphanumid'], ld['value'])],
             jsondata={"icon": data['DomainElement'][(ld['feature_alphanumid'], ld['value'])].jsondata},
@@ -263,10 +297,45 @@ def main(args):
         
     DBSession.flush()
 
-    #Domains/Chapters
+    #Sources
+    sources = [ktfbib(bibsource) for ld in ldps if ld.get('bibsources') for bibsource in ld['bibsources'].split(",,,")]
+    bibfields = ['bibtex_type', 'author', 'year', 'title', 'type', 'booktitle', 'editor', 'pages', 'edition', 'journal', 'school', 'address', 'url', 'note', 'number', 'series', 'volume', 'publisher', 'organization', 'chapter', 'howpublished', 'name', 'description']
+    #TODO bib = Database.from_file(args.data_file('ALL.bib'), lowercase=True)
+    for (k, (typ, bibdata)) in sources:
+        #author = fields.get("author")
+        #year = fields.get("year")
+        #print typ
+        #'pk': k, 'google_book_search_id': None,
+        rec = Record(typ, k, **bibdata)
+        #bibdata["genre"] = typ
+        #bibdata["id"] = k
+        
+        #bibdata.update({'id': k, 'name': bibdata.get("author", ""), 'description': bibdata.get('title', bibdata.get('booktitle')), 'bibtex_type': getattr(EntryType, typ), _obj=bibtex2source(bibdata)})
+        #bibdata = dict([(f, bibdata[f]) for f in bibfields if bibdata.has_key(f)])
+        #data.add(common.Source, k, **bibdata)
+        if not data["Source"].has_key(k):
+            data.add(common.Source, k, _obj=bibtex2source(rec))
+    #data.add(common.Source, k, **bibdata)
+    DBSession.flush()
+    #data.add(common.Source, k, **{"pk": k, "title": "hej", "author": "dej", "year": "1999"})
+    #data.add(common.Source, k, **{"title": "hej", "author": "dej", "year": "1999"})
 
-
-
+    #ValueSetReference
+    #migrate(
+    #    'datapoint_reference'
+    #    common.ValueSetReference,
+    #    lambda r: dict(
+    #        valueset=data['ValueSet'][r['datapoint_id']],
+    #        source=data['Source'][r['reference_id']],
+    #        description=r['note']))
+    for ld in ldps:
+        sources = [ktfbib(bibsource) for bibsource in ld['bibsources'].split(",,,") if ld.get('bibsources')]
+        for (k, (typ, bibdata)) in sources:
+            parameter = data['Feature'][ld['feature_alphanumid']]
+            language = data['sailsLanguage'][ld['language_id']]
+            id_ = '%s-%s' % (parameter.id, language.id)
+            data.add(common.ValueSetReference, "%s-%s" % (id_, k), valueset = data["ValueSet"][id_], source = data['Source'][k])
+    DBSession.flush()
 
 
 
@@ -278,18 +347,17 @@ def main(args):
     dataset = common.Dataset(
         id="SAILS",
         name='SAILS Online',
-        publisher_name="Max Planck Institute for Evolutionary Anthropology",
-        publisher_place="Leipzig",
-        publisher_url="http://www.eva.mpg.de",
+        publisher_name="Radboud University",
+        publisher_place="Nijmegen",
+        publisher_url="http://www.ru.nl",
         description="Dataset on Typological Features for South American Languages, collected 2009-2013 in the Traces of Contact Project (ERC Advanced Grant 230310) awarded to Pieter Muysken, Radboud Universiteit, Nijmegen, the Netherlands.",
-        domain='sails.clld.org',
+        domain='http://cls.ru.nl/staff/hhammarstrom/sails.html',
         published=date(2014, 2, 20),
         contact='harald.hammarstroem@mpi.nl',
         license='http://creativecommons.org/licenses/by-nc-nd/2.0/de/deed.en',
-        #jsondata={
-        #    'license_icon': 'http://wals.info/static/images/cc_by_nc_nd.png',
-        #    'license_name': 'Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Germany'}
-    )
+        jsondata={
+            'license_icon': 'http://wals.info/static/images/cc_by_nc_nd.png',
+            'license_name': 'Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Germany'})
     DBSession.add(dataset)
     DBSession.flush()
 
@@ -432,7 +500,12 @@ def prime_cache(args):
     This procedure should be separate from the db initialization, because
     it will have to be run periodiucally whenever data has been updated.
     """
+    
+    compute_language_sources()
+    transaction.commit()
+    transaction.begin()
 
+    gbs_func('update', args)
 
 if __name__ == '__main__':
     initializedb(create=main, prime_cache=prime_cache)

@@ -13,10 +13,19 @@ from clld.web.datatables.base import (
 
 from sails.models import FeatureDomain, Feature, sailsLanguage, Family, sailsValue, Designer
 
+
 class FeatureIdCol(IdCol):
     def search(self, qs):
         if self.model_col:
             return self.model_col.contains(qs)
+
+    def order(self):
+        #print self.name
+        #print self.get_obj
+        #print dir(self)
+        #print get_object(self)
+        #print self.get_object()
+        return Feature.sortkey_str, Feature.sortkey_int
 
 
 class _FeatureDomainCol(Col):
@@ -81,8 +90,8 @@ class Languages(datatables.Languages):
 
     def col_defs(self):
         return [
-            LinkCol(self, 'Name'),
-            IdCol(self, 'ISO-639-3', sClass='left'),
+            LinkCol(self, 'Name', model_col=sailsLanguage.name),
+            IdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id),
             #FamilyCol(self, 'Family'),
             Col(self, 'Family', model_col=Family.name, get_object=lambda i: i.family),
             Col(self, 'Features', model_col=sailsLanguage.representation),
@@ -124,7 +133,7 @@ class Datapoints(DataTable):
         if not self.sailslanguage:
             cols = cols + [LinkCol(self, 'Name', model_col=sailsLanguage.name, get_object=lambda i: i.language), IdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id, get_object=lambda i: i.language)]
         if not self.feature:
-            cols = cols + [LinkCol(self, 'Feature', model_col=Feature.name, get_object=lambda i: i.parameter), IdCol(self, 'Feature Id', sClass='left', model_col=Feature.id, get_object=lambda i: i.parameter)]
+            cols = cols + [LinkCol(self, 'Feature', model_col=Feature.name, get_object=lambda i: i.parameter), FeatureIdCol(self, 'Feature Id', sClass='left', model_col=Feature.id, get_object=lambda i: i.parameter)]
         #, LinkCol(self, 'Domain', model_col=FeatureDomain.name)
 
         cols = cols + [

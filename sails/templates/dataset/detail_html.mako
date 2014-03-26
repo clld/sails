@@ -22,7 +22,7 @@ s.parentNode.insertBefore(gcse, s);
 <h2>Welcome to SAILS Online</h2>
 
 <p class="lead">
-The South American Indigenous Language Structures (SAILS) is a large database of grammatical properties of languages gathered from descriptive materials (such as reference grammars) by a team directed by Pieter Muysken.
+The South American Indigenous Language Structures (SAILS) is a large database of grammatical properties of languages gathered from descriptive materials (such as reference grammars) by a team directed by Pieter Muysken. SAILS Online was programmed by Harald Hammarstr&ouml;m using the CLLD framework, with support from Robert Forkel.
 </p>
 
 <p>
@@ -65,7 +65,7 @@ Krasnoukhova, Olga. 2013. <I>The Noun Phrase in the Languages of South America</
 <p>
 If you are citing all the data, use:
 <blockquote>
-Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn & George Saad. 2014. <I>South American Indian Language Structures (SAILS) Online</I>. Online Publication of the Radboud University. (Available at http://sails.science.ru.nl)
+Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn & George Saad. 2014. <I>South American Indian Language Structures (SAILS) Online</I>. Online Publication of the Radboud University. (Available at http://sails.clld.org)
 </blockquote>
 </p>
 
@@ -74,4 +74,21 @@ Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, 
 The content of this web site is published under a Creative Commons Licence.
 We invite the community of users to think about further applications for the available data
 and look forward to your comments, feedback and questions.
+</p>
+
+<h3>Acknowledgements</h3>
+<p>
+SAILS Online was supported by funding from ERC, KNAW and Radboud University.
+<table>
+<tr>
+<td>
+ <img src="http://www.knaw.nl/nl/de-knaw/organisatie/shared/resources/images/KNAW_100pt_RGB.jpg" alt="http://www.knaw.nl" width="304">
+</td>
+<td>
+ <img src="http://erc.europa.eu/sites/default/files/content/LOGO-ERC.jpg" alt="http://erc.europa.eu" width="104" height="142">
+</td>
+<td>
+ <img src="http://www.ru.nl/publish/pages/610085/ru_nl_a4_pms.jpg" alt="http://www.ru.nl" width="204">
+</td>
+</table> 
 </p>

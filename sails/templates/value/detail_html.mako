@@ -9,7 +9,7 @@
 <dt>Language:</dt>
 <dd>${h.link(request, ctx.language)}</dd>
 <dt>Feature:</dt>
-<dd>${h.link(request, ctx.parameter)} designed by ${ctx.parameter.designer.name}</dd>
+<dd>${h.link(request, ctx.parameter)} designed by ${ctx.parameter.designer.contributor}</dd>
 <dt>Value:</dt>
 <dd>${ctx.domainelement.name}</dd>
 <dt>Datapoint contributed by:</dt>

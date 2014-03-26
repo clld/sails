@@ -50,6 +50,7 @@ def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
 
+    settings['sitemaps'] = 'contribution parameter source sentence valueset'.split()
     convert = lambda spec: ''.join(c if i == 0 else c + c for i, c in enumerate(spec))
     filename_pattern = re.compile('(?P<spec>(c|d|s|f|t)[0-9a-f]{3})\.png')
     icons = {}
@@ -67,9 +68,9 @@ def main(global_config, **settings):
         ('dataset', partial(menu_item, 'dataset', label='Home')),
         ('parameters', partial(menu_item, 'parameters', label='Features')),
         ('languages', partial(menu_item, 'languages')),
+        ('sources', partial(menu_item, 'sources')),
         ('designers', partial(menu_item, 'contributions', label="Authors")),
     )
-
     config.include('clldmpg')
     config.include('sails.adapters')
     config.include('sails.datatables')

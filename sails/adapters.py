@@ -10,6 +10,7 @@ from clld.web.adapters.geojson import (
     pacific_centered_coordinates,
 )
 from clld.web.adapters.download import CsvDump
+from clld.web.maps import GeoJsonSelectedLanguages, SelectedLanguagesMap
 from clld.db.meta import DBSession
 from clld.db.models.common import Value, ValueSet, DomainElement, Language, Parameter
 from sails.models import sailsLanguage
@@ -91,6 +92,10 @@ class Matrix(CsvDump):
         values['URL'] = req.resource_url(item)
         return [values.get(p, '') for p in self.get_fields(req)]
 
+class _GeoJsonSelectedLanguages(GeoJsonSelectedLanguages):
+    def get_coordinates(self, language):
+        return pacific_centered_coordinates(language)
+
 class MapView(Index):
     extension = str('map.html')
     mimetype = str('text/vnd.clld.map+html')
@@ -100,7 +105,7 @@ class MapView(Index):
     def template_context(self, ctx, req):
         languages = list(ctx.get_query(limit=8000))
         return {
-            'map': _SelectedLanguagesMap(
+            'map': SelectedLanguagesMap(
                 ctx, req, languages, geojson_impl=_GeoJsonSelectedLanguages),
             'languages': languages}
 

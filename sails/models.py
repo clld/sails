@@ -95,6 +95,8 @@ class Feature(Parameter, CustomModelMixin, Versioned):
     designer_pk = Column(Integer, ForeignKey('designer.pk'))
     designer = relationship(Designer, lazy='joined', backref="features")
     dependson = Column(String)
+    sortkey_str = Column(String)
+    sortkey_int = Column(Integer)
     #chapter = relationship(Chapter, lazy='joined', backref="features")
 #CREATE table features(fid VARCHAR(600) BINARY NOT NULL, fdoc VARCHAR(1000), vdoc VARCHAR(1000), grp VARCHAR(1000), designer VARCHAR(100), dependson VARCHAR(600) references features(fid), PRIMARY KEY (fid(600)));
 
