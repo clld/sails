@@ -11,3 +11,9 @@ class Tests(TestWithApp):
 
     def test_home(self):
         res = self.app.get('/', status=200)
+
+    def test_maps(self):
+        self.app.get_html('/parameters/NP740')
+        self.app.get_json('/parameters/NP740.solr.json')
+        self.app.get_html('/combinations/AND3_AND4')
+        self.app.get_html('/sources/sdricharabela')

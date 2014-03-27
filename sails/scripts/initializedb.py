@@ -4,9 +4,8 @@ import transaction
 
 from pytz import utc
 from datetime import date, datetime
-#import MySQLdb
 
-from clld.scripts.util import initializedb, Data, gbs_func, bibtex2source
+from clld.scripts.util import initializedb, Data, gbs_func, bibtex2source, glottocodes_by_isocode
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.db.util import compute_language_sources
@@ -136,8 +135,7 @@ def main(args):
     #fromdb=MySQLdb.connect(user="root", passwd="blodig1kuk", db="linc")
     icons = issues.Icons()
 
-
-
+    glottocodes = glottocodes_by_isocode(args.glottolog_dburi)
 
     #Languages
     dp = dtab("dp.tab")
@@ -159,28 +157,38 @@ def main(args):
     families = grp2([(lg_to_fam[lg], lg) for lg in lgs.keys()])
     ficons = dict(icons.iconizeall([f for (f, sailslgs) in families.iteritems() if len(sailslgs) != 1]).items() + [(f, icons.graytriangle) for (f, sailslgs) in families.iteritems() if len(sailslgs) == 1])
     for family in families.iterkeys():
-        fam = data.add(models.Family, family, pk = family, name = family, jsondata={"icon": ficons[family]})
+        fam = data.add(models.Family, family, id=family, name=family, jsondata={"icon": ficons[family]})
 
     DBSession.flush()
 
     #Lgs
     for lgid in lgs.iterkeys():
-        data.add(common.Identifier, lgid, name=lgid, type=common.IdentifierType.iso.value, description=lgs[lgid])
-    DBSession.flush()
-
-    for lgid in lgs.iterkeys():
-        lang = data.add(models.sailsLanguage, lgid, id = lgid, name = lgs[lgid], family=data["Family"][lg_to_fam[lgid]], representation = nfeatures[lgid], latitude = float(lats[lgid]), longitude = float(lons[lgid]))
-    DBSession.flush()
-
-    for lgid in lgs.iterkeys():
-        lang = data.add(common.LanguageIdentifier, lgid, language=data['sailsLanguage'][lgid], identifier=data['Identifier'][lgid], description="has iso-639-3 code")
+        lang = data.add(
+            models.sailsLanguage, lgid,
+            id=lgid,
+            name=lgs[lgid],
+            family=data["Family"][lg_to_fam[lgid]],
+            representation=nfeatures[lgid],
+            latitude=float(lats[lgid]),
+            longitude=float(lons[lgid]))
+        if not lgid.startswith('NOCODE'):
+            iso = data.add(
+                common.Identifier, lgid,
+                id=lgid, name=lgid, type=common.IdentifierType.iso.value, description=lgs[lgid])
+            data.add(common.LanguageIdentifier, lgid, language=lang, identifier=iso)
+        if lgid in glottocodes:
+            gc = glottocodes[lgid]
+            gc = data.add(
+                common.Identifier, 'gc' + lgid,
+                id=gc, name=gc, type=common.IdentifierType.glottolog.value, description=lgs[lgid])
+            data.add(common.LanguageIdentifier, lgid, language=lang, identifier=gc)
     DBSession.flush()
 
     #Domains
     domains = dict([(ld['feature_domain'], ld) for ld in ldps])
     for domain in domains.iterkeys():
         #print domain
-        data.add(models.FeatureDomain, domain, pk=domain, name=domain)
+        data.add(models.FeatureDomain, domain, id=domain, name=domain)
     DBSession.flush()
 
     #Designers
@@ -347,11 +355,16 @@ def main(args):
     dataset = common.Dataset(
         id="SAILS",
         name='SAILS Online',
-        publisher_name="Radboud University",
-        publisher_place="Nijmegen",
-        publisher_url="http://www.ru.nl",
+        #publisher_name="Radboud University",
+        #publisher_place="Nijmegen",
+        #publisher_url="http://www.ru.nl",
+        #description="Dataset on Typological Features for South American Languages, collected 2009-2013 in the Traces of Contact Project (ERC Advanced Grant 230310) awarded to Pieter Muysken, Radboud Universiteit, Nijmegen, the Netherlands.",
+        #domain='http://cls.ru.nl/staff/hhammarstrom/sails.html',
+        publisher_name="Max Planck Institute for Evolutionary Anthropology",
+        publisher_place="Leipzig",
+        publisher_url="http://www.eva.mpg.de",
         description="Dataset on Typological Features for South American Languages, collected 2009-2013 in the Traces of Contact Project (ERC Advanced Grant 230310) awarded to Pieter Muysken, Radboud Universiteit, Nijmegen, the Netherlands.",
-        domain='http://cls.ru.nl/staff/hhammarstrom/sails.html',
+        domain='sails.clld.org',
         published=date(2014, 2, 20),
         contact='harald.hammarstroem@mpi.nl',
         license='http://creativecommons.org/licenses/by-nc-nd/2.0/de/deed.en',

@@ -1,6 +1,4 @@
 from sqlalchemy.orm import joinedload, joinedload_all
-from sqlalchemy.sql.expression import cast
-from sqlalchemy.types import Integer
 
 from clld.db.meta import DBSession
 from clld.db.models import common
@@ -20,11 +18,6 @@ class FeatureIdCol(IdCol):
             return self.model_col.contains(qs)
 
     def order(self):
-        #print self.name
-        #print self.get_obj
-        #print dir(self)
-        #print get_object(self)
-        #print self.get_object()
         return Feature.sortkey_str, Feature.sortkey_int
 
 
@@ -39,15 +32,11 @@ class _FeatureDomainCol(Col):
     def search(self, qs):
         return FeatureDomain.name.__eq__(qs)
 
+
 class FeatureDomainCol(_FeatureDomainCol):
     def format(self, item):
         return item.featuredomain.name
 
-    #def order(self):
-    #    return FeatureDomain.name
-
-    #def search(self, qs):
-    #    return FeatureDomain.name.contains(qs)
 
 class FamilyCol(Col):
     def format(self, item):
@@ -59,19 +48,11 @@ class FamilyCol(Col):
     def search(self, qs):
         return Family.name.contains(qs)
 
-#class DesignerCol(LinkCol):
-#    def format(self, item):
-#        return linked_contributors(self.dt.req, item.designer)
-
-#    def order(self):
-#        return Feature.designer
-
-#    def search(self, qs):
-#        return Feature.designer.contains(qs)
 
 class Features(datatables.Parameters):
     def base_query(self, query):
-        return query.join(Designer).options(joinedload_all(Feature.designer)).join(FeatureDomain).options(joinedload_all(Feature.featuredomain))
+        return query.join(Designer).options(joinedload_all(Feature.designer))\
+            .join(FeatureDomain).options(joinedload_all(Feature.featuredomain))
 
     def col_defs(self):
         return [
@@ -79,10 +60,10 @@ class Features(datatables.Parameters):
             LinkCol(self, 'Feature', model_col=Feature.name),
             FeatureDomainCol(self, 'Domain'),
             Col(self, 'Designer', model_col=Designer.contributor, get_object=lambda i: i.designer), # get_object=lambda i: i.feature.designer),
-            #DesignerCol(self, 'Designer'), #, bSearchable=False, bSortable=False
             Col(self, 'Languages', model_col=Feature.representation),
             DetailsRowLinkCol(self, 'd', button_text='Values'),
         ]
+
 
 class Languages(datatables.Languages):
     def base_query(self, query):
@@ -98,6 +79,7 @@ class Languages(datatables.Languages):
             LinkToMapCol(self, 'm'),
         ]
 
+
 class Designers(datatables.Contributions):
     def col_defs(self):
         return [
@@ -107,39 +89,27 @@ class Designers(datatables.Contributions):
             Col(self, 'More Information', model_col=Designer.pdflink),
         ]
 
+
 class Datapoints(DataTable):
     __constraints__ = [Feature, sailsLanguage]
 
     def base_query(self, query):
         query = query.join(sailsValue).options(joinedload_all(sailsValue.language)).join(sailsValue.parameter).options(joinedload_all(sailsValue.parameter)).distinct()
-        #.join(FeatureDomain).options(joinedload_all(Feature.featuredomain))
         if self.sailslanguage:
-        #    #query = query.join(sailsValue.parameter)
             query = query.filter(sailsValue.language_pk == self.sailslanguage.pk)
         if self.feature:
-        #    #query = query.join(sailsValue.parameter)
             query = query.filter(sailsValue.parameter_pk == self.feature.pk)
         return query
 
     def col_defs(self):
-        # remove the details link.
-        #cols = super(Datapoints, self).col_defs()[1:]
-        #if self.language:
-        #    cols = [
-        #        FeatureIdCol(self, 'Feature Id', sClass='left')
-        #    ] + cols
-
         cols = []
         if not self.sailslanguage:
             cols = cols + [LinkCol(self, 'Name', model_col=sailsLanguage.name, get_object=lambda i: i.language), IdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id, get_object=lambda i: i.language)]
         if not self.feature:
             cols = cols + [LinkCol(self, 'Feature', model_col=Feature.name, get_object=lambda i: i.parameter), FeatureIdCol(self, 'Feature Id', sClass='left', model_col=Feature.id, get_object=lambda i: i.parameter)]
-        #, LinkCol(self, 'Domain', model_col=FeatureDomain.name)
 
         cols = cols + [
             LinkCol(self, 'Value'),
-            #Col(self, 'Feature', model_col=Feature.name, get_object=lambda i: i.parameter),
-            #Col(self, 'Domain', model_col=sailsValue.parameter.featuredomain.name),
             Col(self, 'Source', model_col=sailsValue.source),
         ]
         return cols
@@ -150,8 +120,6 @@ class Datapoints(DataTable):
             # features is an upper bound for the number of values; thus, we do not
             # paginate.
             return {'bLengthChange': False, 'bPaginate': False}
-
-
 
 
 def includeme(config):
