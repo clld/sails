@@ -21,6 +21,10 @@ class FeatureIdCol(IdCol):
         return Feature.sortkey_str, Feature.sortkey_int
 
 
+class LanguageIdCol(IdCol):
+    def format(self, item):
+        return item.isodisplay
+
 class _FeatureDomainCol(Col):
     def __init__(self, *args, **kw):
         super(_FeatureDomainCol, self).__init__(*args, **kw)
@@ -72,7 +76,7 @@ class Languages(datatables.Languages):
     def col_defs(self):
         return [
             LinkCol(self, 'Name', model_col=sailsLanguage.name),
-            IdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id),
+            LanguageIdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id),
             #FamilyCol(self, 'Family'),
             Col(self, 'Family', model_col=Family.name, get_object=lambda i: i.family),
             Col(self, 'Features', model_col=sailsLanguage.representation),
@@ -104,12 +108,13 @@ class Datapoints(DataTable):
     def col_defs(self):
         cols = []
         if not self.sailslanguage:
-            cols = cols + [LinkCol(self, 'Name', model_col=sailsLanguage.name, get_object=lambda i: i.language), IdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id, get_object=lambda i: i.language)]
+            cols = cols + [LinkCol(self, 'Name', model_col=sailsLanguage.name, get_object=lambda i: i.language), LanguageIdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id, get_object=lambda i: i.language)]
         if not self.feature:
             cols = cols + [LinkCol(self, 'Feature', model_col=Feature.name, get_object=lambda i: i.parameter), FeatureIdCol(self, 'Feature Id', sClass='left', model_col=Feature.id, get_object=lambda i: i.parameter)]
 
         cols = cols + [
             LinkCol(self, 'Value'),
+            Col(self, 'Description', model_col=sailsValue.description),
             Col(self, 'Source', model_col=sailsValue.source),
         ]
         return cols

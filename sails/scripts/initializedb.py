@@ -19,25 +19,6 @@ import issues
 #http://cls.ru.nl/staff/hhammarstrom/sails.html
 #id=sails.__name__,
 #TODO sidebar
-#TODO de.description ocksa i sidebar under features
-#<dt>Legal Values and Meanings:</dt>
-#<dd>
-#<table class="table table-hover table-condensed domain" style="width: auto;">
-#<thead>
-#<tr>
-#<th>Value</th><th>Meaning</th>
-#</tr>
-#</thead>
-#<tbody>
-#        % for de in ctx.domain:
-#<tr>
-#<td>${de.name}</td>
-#<td>${de.description}</td>
-#</tr>
-#        % endfor
-#</tbody>
-#</table>
-#</dd>
 
 #lgid in lgs
 #lgname in lgs
@@ -132,7 +113,6 @@ def treetxt(txt):
 def main(args):
     #http://clld.readthedocs.org/en/latest/extending.html
     data = Data(created=utc.localize(datetime(2013, 11, 15)), updated=utc.localize(datetime(2013, 12, 12)))
-    #fromdb=MySQLdb.connect(user="root", passwd="blodig1kuk", db="linc")
     icons = issues.Icons()
 
     glottocodes = glottocodes_by_isocode(args.glottolog_dburi)
@@ -166,6 +146,7 @@ def main(args):
         lang = data.add(
             models.sailsLanguage, lgid,
             id=lgid,
+            isodisplay="-" if lgid.startswith("NOCODE") else lgid,
             name=lgs[lgid],
             family=data["Family"][lg_to_fam[lgid]],
             representation=nfeatures[lgid],
@@ -219,20 +200,24 @@ def main(args):
     nlgs = opv(grp2([(ld['feature_alphanumid'], ld['language_id']) for ld in ldps if ld["value"] != "?"]), len)
     
     redigit = re.compile('([0-9]+)')
-    fidstr = dict([(fid, '--'.join([c for c in redigit.split(fid) if not c.isdigit()])) for fid in fs.iterkeys()])
+    fidstr = dict([(fid, '--'.join([c for c in redigit.split(fid) if c.strip() and (c != "-") and not c.isdigit()])) for fid in fs.iterkeys()])
     fidintdata = dict([(fid, [int(c) for c in redigit.split(fid) if c.isdigit()]) for fid in fs.iterkeys()])
     #fidintrange = max([len(x) for x in fidintdata.itervalues()])
     fidintranges = opv(grp2([(i, x) for ii in fidintdata.itervalues() for (i, x) in enumerate(ii)]), max)
     rmul = rangify([fidintranges[i] for i in range(len(fidintranges))])
     fidint = opv(fidintdata, lambda ii, rmul = rmul: sum([a*b for (a, b) in zip(ii, rmul)]))
     for (fid, f) in fs.iteritems():
+        if nlgs[fid] == 0:
+            continue
         param = data.add(models.Feature, fid, id=fid, name=fnamefix.get(fid, f['feature_name']), doc=f['feature_information'], vdoc=f['feature_possible_values'], representation=nlgs[fid], designer=data["Designer"][f['designer']], dependson = f["depends_on"], featuredomain = data['FeatureDomain'][f["feature_domain"]], sortkey_str = fidstr[fid], sortkey_int = fidint[fid])
-
+        #if fid in ["ARGEX2-1", "ARGEX2-1-1", "ARGEX2-10"]:
+        #    print fid, fidstr[fid], fidint[fid]
 
     #Families
     DBSession.flush()
 
     fvs = dict([(ld['feature_alphanumid'], ld['feature_possible_values']) for ld in ldps])
+    fvdesc = {}
     for (fid, vs) in fvs.iteritems():
         vdesclist = [veq.split("==") for veq in vs.split("||")]
         try:
@@ -246,7 +231,10 @@ def main(args):
         vi = dict([(v, i) for (i, v) in enumerate(sorted(vdesc.keys()))])
         vicons = icons.iconize(vi.keys())
         #print data['Feature'][fid].pk, fid, vdesc.keys()
+        if len(vdesc) == 0:
+            print "VDESC missing", vs, fid, v
         for (v, desc) in vdesc.iteritems():
+            fvdesc[(fid, v)] = desc
             data.add(
                 common.DomainElement, (fid, v),
                 id='%s-%s' % (fid, v),
@@ -257,6 +245,7 @@ def main(args):
                 parameter=data['Feature'][fid])
     DBSession.flush()
 
+    sources = {}
     for ld in ldps:
         #if not data['Feature'].has_key(ld['feature_alphanumid']) or not data['Language'].has_key(ld['language_id']):
         #    continue
@@ -297,36 +286,29 @@ def main(args):
             language=language,
             parameter=parameter,
             source=ld["source"],
+            description=fvdesc[(ld['feature_alphanumid'], ld['value'])],
             contributor=ld["contributor"],
             comment=ld["comment"],
             example=ld["example"],
             valueset=valueset,
         )
-        
-    DBSession.flush()
+
+        setd(sources, ld["source"], "%s-%s" % (ld['feature_alphanumid'], ld['value']))
+
+    #import codecs
+    #f = codecs.open("C:\python26\sailss.tab", 'w', encoding = "utf-8")
+    #txt = u'\n'.join([u'\t'.join((a,) + tuple(b.keys())) for (a, b) in sorted(sources.iteritems()) if a])
+    #f.write(txt)
+    #f.close()
+    #DBSession.flush()
 
     #Sources
     sources = [ktfbib(bibsource) for ld in ldps if ld.get('bibsources') for bibsource in ld['bibsources'].split(",,,")]
-    bibfields = ['bibtex_type', 'author', 'year', 'title', 'type', 'booktitle', 'editor', 'pages', 'edition', 'journal', 'school', 'address', 'url', 'note', 'number', 'series', 'volume', 'publisher', 'organization', 'chapter', 'howpublished', 'name', 'description']
-    #TODO bib = Database.from_file(args.data_file('ALL.bib'), lowercase=True)
     for (k, (typ, bibdata)) in sources:
-        #author = fields.get("author")
-        #year = fields.get("year")
-        #print typ
-        #'pk': k, 'google_book_search_id': None,
         rec = Record(typ, k, **bibdata)
-        #bibdata["genre"] = typ
-        #bibdata["id"] = k
-        
-        #bibdata.update({'id': k, 'name': bibdata.get("author", ""), 'description': bibdata.get('title', bibdata.get('booktitle')), 'bibtex_type': getattr(EntryType, typ), _obj=bibtex2source(bibdata)})
-        #bibdata = dict([(f, bibdata[f]) for f in bibfields if bibdata.has_key(f)])
-        #data.add(common.Source, k, **bibdata)
         if not data["Source"].has_key(k):
             data.add(common.Source, k, _obj=bibtex2source(rec))
-    #data.add(common.Source, k, **bibdata)
     DBSession.flush()
-    #data.add(common.Source, k, **{"pk": k, "title": "hej", "author": "dej", "year": "1999"})
-    #data.add(common.Source, k, **{"title": "hej", "author": "dej", "year": "1999"})
 
     #ValueSetReference
     #migrate(

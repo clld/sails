@@ -35,7 +35,7 @@ class sailsLanguage(Language, CustomModelMixin):
     family_pk = Column(Integer, ForeignKey('family.pk'))
     family = relationship(Family, backref=backref("languages", order_by="Language.name"))
     representation = Column(Integer)
-
+    isodisplay = Column(Unicode)
 
 @implementer(interfaces.IValue)
 class sailsValue(Value, CustomModelMixin):
@@ -47,6 +47,7 @@ class sailsValue(Value, CustomModelMixin):
     language = relationship('sailsLanguage')
     contributor = Column(Unicode)
     comment = Column(Unicode)
+    description = Column(Unicode)
     example = Column(Unicode)
 
 

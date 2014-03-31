@@ -16,7 +16,8 @@
 <td title="click to select a different map marker" id="iconselect${str(de.number)}" data-toggle="popover" data-placement="left">
 ${h.map_marker_img(req, de)}
 </td>
-<td>${de}</td>
+<td>${de.name}</td>
+<td>${de.description}</td>
 <td class="right">${len(de.values)}</td>
 </tr>
             % endfor
