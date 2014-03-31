@@ -10,6 +10,7 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.db.util import compute_language_sources
 from clld.lib.bibtex import EntryType, Record
+from clld.util import slug
 
 import sails
 from sails import models
@@ -146,7 +147,6 @@ def main(args):
         lang = data.add(
             models.sailsLanguage, lgid,
             id=lgid,
-            isodisplay="-" if lgid.startswith("NOCODE") else lgid,
             name=lgs[lgid],
             family=data["Family"][lg_to_fam[lgid]],
             representation=nfeatures[lgid],
@@ -166,19 +166,16 @@ def main(args):
     DBSession.flush()
 
     #Domains
-    domains = dict([(ld['feature_domain'], ld) for ld in ldps])
-    for domain in domains.iterkeys():
-        #print domain
-        data.add(models.FeatureDomain, domain, id=domain, name=domain)
+    for domain in set(ld['feature_domain'] for ld in ldps):
+        data.add(models.FeatureDomain, domain, id=slug(domain), name=domain)
     DBSession.flush()
 
     #Designers
     designer_info = dict([(dd['designer'], dd) for dd in dtab("sailscontributions.tab")])
     designers = dict([(ld['designer'], ld['feature_domain']) for ld in ldps])
+    citation_template = "%s. 2014. %s. In Muysken, Pieter et al. (eds.) South American Indian Language Structures (SAILS) Online. Leipzig: Online Max Planck Institute of Evolutionary Anthropology. (Available at http://sails.clld.org)"
     for (designer_id, (designer, domain)) in enumerate(designers.iteritems()):
-        #print domain
-        #print designer_info[designer]  
-        data.add(models.Designer, designer, pk=designer_id, name=designer_id, domain=designer_info[designer]["domain"], contributor=designer, pdflink=designer_info[designer]["pdflink"], citation=designer_info[designer]["citation"])
+        data.add(models.Designer, designer, id=str(designer_id), name=designer_id, domain=designer_info[designer]["domain"], contributor=designer, citation=citation_template % (designer, designer_info[designer]["domain"]), more_information=designer_info[designer]["citation"])
     DBSession.flush()
 
 
@@ -209,7 +206,18 @@ def main(args):
     for (fid, f) in fs.iteritems():
         if nlgs[fid] == 0:
             continue
-        param = data.add(models.Feature, fid, id=fid, name=fnamefix.get(fid, f['feature_name']), doc=f['feature_information'], vdoc=f['feature_possible_values'], representation=nlgs[fid], designer=data["Designer"][f['designer']], dependson = f["depends_on"], featuredomain = data['FeatureDomain'][f["feature_domain"]], sortkey_str = fidstr[fid], sortkey_int = fidint[fid])
+        data.add(
+            models.Feature, fid,
+            id=fid,
+            name=fnamefix.get(fid, f['feature_name']),
+            description=f['feature_information'],
+            jsondata=dict(vdoc=f['feature_possible_values']),
+            representation=nlgs[fid],
+            designer=data["Designer"][f['designer']],
+            dependson=f["depends_on"],
+            featuredomain=data['FeatureDomain'][f["feature_domain"]],
+            sortkey_str=fidstr[fid],
+            sortkey_int=fidint[fid])
         #if fid in ["ARGEX2-1", "ARGEX2-1-1", "ARGEX2-10"]:
         #    print fid, fidstr[fid], fidint[fid]
 
@@ -245,26 +253,16 @@ def main(args):
                 parameter=data['Feature'][fid])
     DBSession.flush()
 
-    sources = {}
     for ld in ldps:
-        #if not data['Feature'].has_key(ld['feature_alphanumid']) or not data['Language'].has_key(ld['language_id']):
-        #    continue
         parameter = data['Feature'][ld['feature_alphanumid']]
         language = data['sailsLanguage'][ld['language_id']]
         
         id_ = '%s-%s' % (parameter.id, language.id)
 
-        if not data['DomainElement'].has_key((ld['feature_alphanumid'], ld['value'])):
+        if (ld['feature_alphanumid'], ld['value']) not in data['DomainElement']:
             print ld['feature_alphanumid'], ld['feature_name'], ld['language_id'], ld['value'], "not in the set of legal values"
             continue
 
-        #valueset = data.add(
-        #    common.ValueSet, lgid,
-        #    id=id_,
-        #    language=language,
-        #    parameter=parameter,
-        #    #contribution=parameter.chapter,
-        #)
         valueset = data.add(
             common.ValueSet,
             id_,
@@ -273,27 +271,20 @@ def main(args):
             id=id_,
             language=language,
             parameter=parameter,
-            contribution=parameter.designer
+            contribution=parameter.designer,
+            source=ld["source"].strip() or None,
         )
         data.add(
             models.sailsValue,
             id_,
-            #ld['value'],
-            #name=ld['value'],
             id=id_,
             domainelement=data['DomainElement'][(ld['feature_alphanumid'], ld['value'])],
             jsondata={"icon": data['DomainElement'][(ld['feature_alphanumid'], ld['value'])].jsondata},
-            language=language,
-            parameter=parameter,
-            source=ld["source"],
             description=fvdesc[(ld['feature_alphanumid'], ld['value'])],
-            contributor=ld["contributor"],
             comment=ld["comment"],
             example=ld["example"],
             valueset=valueset,
         )
-
-        setd(sources, ld["source"], "%s-%s" % (ld['feature_alphanumid'], ld['value']))
 
     #import codecs
     #f = codecs.open("C:\python26\sailss.tab", 'w', encoding = "utf-8")
@@ -324,7 +315,11 @@ def main(args):
             parameter = data['Feature'][ld['feature_alphanumid']]
             language = data['sailsLanguage'][ld['language_id']]
             id_ = '%s-%s' % (parameter.id, language.id)
-            data.add(common.ValueSetReference, "%s-%s" % (id_, k), valueset = data["ValueSet"][id_], source = data['Source'][k])
+            data.add(
+                common.ValueSetReference,
+                "%s-%s" % (id_, k),
+                valueset=data["ValueSet"][id_],
+                source=data['Source'][k])
     DBSession.flush()
 
 
