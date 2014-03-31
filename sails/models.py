@@ -65,6 +65,7 @@ class Designer(Contribution, CustomModelMixin, Versioned):
     contributor = Column(Unicode)
     pdflink = Column(Unicode)
     citation = Column(Unicode)
+    more_information = Column(Unicode)
 
 
 @implementer(interfaces.IParameter)

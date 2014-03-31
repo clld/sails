@@ -91,7 +91,7 @@ class Designers(datatables.Contributions):
             Col(self, 'Designer', model_col=Designer.contributor),
             Col(self, 'Domain of Design', model_col=Designer.domain),
             Col(self, 'Citation', model_col=Designer.citation),
-            Col(self, 'More Information', model_col=Designer.pdflink),
+            Col(self, 'More Information', model_col=Designer.more_information),
         ]
 
 

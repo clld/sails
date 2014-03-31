@@ -175,10 +175,11 @@ def main(args):
     #Designers
     designer_info = dict([(dd['designer'], dd) for dd in dtab("sailscontributions.tab")])
     designers = dict([(ld['designer'], ld['feature_domain']) for ld in ldps])
+    citation_template = "%s. 2014. %s. In Muysken, Pieter et al. (eds.) South American Indian Language Structures (SAILS) Online. Leipzig: Online Max Planck Institute of Evolutionary Anthropology. (Available at http://sails.clld.org)"
     for (designer_id, (designer, domain)) in enumerate(designers.iteritems()):
         #print domain
         #print designer_info[designer]  
-        data.add(models.Designer, designer, pk=designer_id, name=designer_id, domain=designer_info[designer]["domain"], contributor=designer, pdflink=designer_info[designer]["pdflink"], citation=designer_info[designer]["citation"])
+        data.add(models.Designer, designer, pk=designer_id, name=designer_id, domain=designer_info[designer]["domain"], contributor=designer, citation=citation_template % (designer, designer_info[designer]["domain"]), more_information=designer_info[designer]["citation"])
     DBSession.flush()
 
 
