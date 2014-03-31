@@ -23,7 +23,8 @@ class FeatureIdCol(IdCol):
 
 class LanguageIdCol(IdCol):
     def format(self, item):
-        return item.isodisplay
+        item = self.get_obj(item)
+        return '' if item.id.startswith('NOCODE') else item.id
 
 class _FeatureDomainCol(Col):
     def __init__(self, *args, **kw):
