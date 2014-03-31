@@ -9,7 +9,7 @@
 
 <h2>${_('Language')} ${ctx.name}</h2>
 
-${request.get_datatable('values', h.models.Value, sailslanguage=ctx).render()}
+${request.get_datatable('values', h.models.Value, language=ctx).render()}
 
 <%def name="sidebar()">
     ${util.codes()}

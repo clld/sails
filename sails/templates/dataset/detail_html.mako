@@ -42,7 +42,8 @@ The South American Indigenous Language Structures (SAILS) is a large database of
 
 
 <p>
-SAILS Online is a publication of the
+SAILS Online is a publication, published by the
+${h.external_link('http://www.eva.mpg.de', label='Max Planck Institute for Evolutionary Anthropology')}, by an authored team from the
 ${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University')}.
 </p>
 
@@ -59,13 +60,13 @@ in the navigation bar.
 <p>
 If you are citing data only from a specific <a href="${request.route_url('contributions')}">domain</a> of SAILS, cite the specific contribution, e.g., for the Noun Phrase (NP) domain:
 <blockquote>
-Krasnoukhova, Olga. 2013. <I>The Noun Phrase in the Languages of South America</I>. Radboud Universiteit Nijmegen Doctoral Dissertation.
+Olga Krasnoukhova. 2014. Noun Phrase (NP). In Muysken, Pieter et al. (eds.) South American Indian Language Structures (SAILS) Online. Leipzig: Online Max Planck Institute of Evolutionary Anthropology. (Available at http://sails.clld.org)
 </blockquote>
 </p>
 <p>
 If you are citing all the data, use:
 <blockquote>
-Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn & George Saad. 2014. <I>South American Indian Language Structures (SAILS) Online</I>. Online Publication of the Radboud University. (Available at http://sails.clld.org)
+Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn & George Saad. 2014. <I>South American Indigenous Language Structures (SAILS) Online</I>. Leipzig: Online Publication of the Max Planck Institute for Evolutionary Anthropology. (Available at http://sails.clld.org)
 </blockquote>
 </p>
 

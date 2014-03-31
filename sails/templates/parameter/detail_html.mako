@@ -32,9 +32,10 @@ ${h.map_marker_img(req, de)}
 <dd>${ctx.featuredomain.name}</dd>
 <dt>Designer:</dt>
 <dd>${ctx.designer.contributor}</dd>
-<dt>Additional Information:</dt>
-<dd>${ctx.doc}</dd>
-
+% if ctx.description:
+    <dt>Additional Information:</dt>
+    <dd>${u.markup_feature_desc(request, ctx.description)|n}</dd>
+% endif
 % if ctx.dependson:
 <dt>Logically depends on:</dt>
 <dd>${ctx.dependson}</dd>
@@ -63,7 +64,4 @@ ${select.render()}
 ${request.map.render()}
 % endif
 
-${request.get_datatable('values', h.models.Value, feature=ctx).render()}
-
-
-
+${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
