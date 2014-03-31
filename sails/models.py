@@ -35,17 +35,21 @@ class sailsLanguage(Language, CustomModelMixin):
     family_pk = Column(Integer, ForeignKey('family.pk'))
     family = relationship(Family, backref=backref("languages", order_by="Language.name"))
     representation = Column(Integer)
-    isodisplay = Column(Unicode)
+    #isodisplay = Column(Unicode)
+
 
 @implementer(interfaces.IValue)
 class sailsValue(Value, CustomModelMixin):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
-    source = Column(Unicode)
-    language_pk = Column(Integer, ForeignKey('language.pk'))
-    parameter_pk = Column(Integer, ForeignKey('parameter.pk'))
-    parameter = relationship('Parameter')
-    language = relationship('sailsLanguage')
-    contributor = Column(Unicode)
+    #source = Column(Unicode)
+
+    #language_pk = Column(Integer, ForeignKey('language.pk'))
+    #parameter_pk = Column(Integer, ForeignKey('parameter.pk'))
+    #parameter = relationship('Parameter')
+    #language = relationship('sailsLanguage')
+
+    #contributor = Column(Unicode)
+
     comment = Column(Unicode)
     description = Column(Unicode)
     example = Column(Unicode)
@@ -65,6 +69,7 @@ class Designer(Contribution, CustomModelMixin, Versioned):
     contributor = Column(Unicode)
     pdflink = Column(Unicode)
     citation = Column(Unicode)
+    more_information = Column(Unicode)
 
 
 @implementer(interfaces.IParameter)
@@ -74,7 +79,6 @@ class Feature(Parameter, CustomModelMixin, Versioned):
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
     id = Column(String(50), unique=True)
     name = Column(String(600), unique=True)
-    doc = Column(String)
     vdoc = Column(String)
     representation = Column(Integer)
     featuredomain_pk = Column(Integer, ForeignKey('featuredomain.pk'))

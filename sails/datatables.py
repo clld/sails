@@ -2,12 +2,13 @@ from sqlalchemy.orm import joinedload, joinedload_all
 
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clld.web.util.helpers import linked_contributors, linked_references
+from clld.web.util.helpers import linked_contributors, linked_references, external_link
 
 from clld.web import datatables
 from clld.web.datatables.base import (
     DataTable, Col, filter_number, LinkCol, DetailsRowLinkCol, IdCol, LinkToMapCol
 )
+from clld.web.datatables.value import Values, ValueNameCol
 
 from sails.models import FeatureDomain, Feature, sailsLanguage, Family, sailsValue, Designer
 
@@ -21,7 +22,7 @@ class FeatureIdCol(IdCol):
         return Feature.sortkey_str, Feature.sortkey_int
 
 
-class LanguageIdCol(IdCol):
+class LanguageIdCol(Col):
     def format(self, item):
         item = self.get_obj(item)
         return '' if item.id.startswith('NOCODE') else item.id
@@ -91,37 +92,59 @@ class Designers(datatables.Contributions):
             Col(self, 'Designer', model_col=Designer.contributor),
             Col(self, 'Domain of Design', model_col=Designer.domain),
             Col(self, 'Citation', model_col=Designer.citation),
-            Col(self, 'More Information', model_col=Designer.pdflink),
+            Col(self, 'More Information', model_col=Designer.more_information),
         ]
 
 
-class Datapoints(DataTable):
-    __constraints__ = [Feature, sailsLanguage]
-
+class Datapoints(Values):
     def base_query(self, query):
-        query = query.join(sailsValue).options(joinedload_all(sailsValue.language)).join(sailsValue.parameter).options(joinedload_all(sailsValue.parameter)).distinct()
-        if self.sailslanguage:
-            query = query.filter(sailsValue.language_pk == self.sailslanguage.pk)
-        if self.feature:
-            query = query.filter(sailsValue.parameter_pk == self.feature.pk)
+        query = Values.base_query(self, query)
+        if self.language:
+            query = query.options(
+                joinedload_all(common.Value.valueset, common.ValueSet.parameter),
+                joinedload(common.Value.domainelement),
+            )
         return query
 
     def col_defs(self):
+        name_col = ValueNameCol(self, 'value')
+        if self.parameter and self.parameter.domain:
+            name_col.choices = [de.name for de in self.parameter.domain]
+
         cols = []
-        if not self.sailslanguage:
-            cols = cols + [LinkCol(self, 'Name', model_col=sailsLanguage.name, get_object=lambda i: i.language), LanguageIdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id, get_object=lambda i: i.language)]
-        if not self.feature:
-            cols = cols + [LinkCol(self, 'Feature', model_col=Feature.name, get_object=lambda i: i.parameter), FeatureIdCol(self, 'Feature Id', sClass='left', model_col=Feature.id, get_object=lambda i: i.parameter)]
+        if self.parameter:
+            cols = [
+                LinkCol(
+                    self, 'Name',
+                    model_col=common.Language.name,
+                    get_object=lambda i: i.valueset.language),
+                LanguageIdCol(
+                    self, 'ISO-639-3',
+                    model_col=common.Language.id,
+                    get_object=lambda i: i.valueset.language)]
+        elif self.language:
+            cols = [
+                LinkCol(
+                    self, 'Feature',
+                    model_col=common.Parameter.name,
+                    get_object=lambda i: i.valueset.parameter),
+                FeatureIdCol(
+                    self, 'Feature Id',
+                    sClass='left', model_col=common.Parameter.id,
+                    get_object=lambda i: i.valueset.parameter)]
 
         cols = cols + [
-            LinkCol(self, 'Value'),
-            Col(self, 'Description', model_col=sailsValue.description),
-            Col(self, 'Source', model_col=sailsValue.source),
+            name_col,
+            Col(self, 'description'),
+            #RefsCol(self, 'source'),
+            Col(self, 'Source',
+                model_col=common.ValueSet.source,
+                get_object=lambda i: i.valueset),
         ]
         return cols
 
     def get_options(self):
-        if self.sailslanguage or self.feature:
+        if self.language or self.parameter:
             # if the table is restricted to the values for one language, the number of
             # features is an upper bound for the number of values; thus, we do not
             # paginate.
