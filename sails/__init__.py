@@ -6,8 +6,6 @@ from clld.interfaces import IParameter, IMapMarker, IDomainElement, IValue, ILan
 from clld.web.adapters.base import adapter_factory
 from clld.web.app import get_configurator, menu_item
 
-from sails.adapters import GeoJsonFeature
-
 
 # we must make sure custom models are known at database initialization!
 from sails import models
@@ -20,17 +18,11 @@ def map_marker(ctx, req):
     icon_map = req.registry.settings['icons']
     icon = None
     if IValue.providedBy(ctx):
-        if 'v%s' % ctx.domainelement.number in req.params:
-            icon = icon_map.get(req.params['v%s' % ctx.domainelement.number])
-        else:
-            icon = ctx.domainelement.jsondata['icon']
+        icon = ctx.domainelement.jsondata['icon']
     elif IDomainElement.providedBy(ctx):
         icon = ctx.jsondata['icon']
     elif ILanguage.providedBy(ctx):
-        if ctx.family.name in req.params:
-            icon = icon_map.get(req.params[ctx.family.name])
-        else:
-            icon = ctx.family.jsondata['icon']
+        icon = ctx.family.jsondata['icon']
     if icon:
         return req.static_url('clld:web/static/icons/' + icon + '.png')
 
@@ -38,7 +30,7 @@ def map_marker(ctx, req):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    settings['sitemaps'] = 'contribution parameter source sentence valueset'.split()
+    settings['sitemaps'] = 'contribution parameter source valueset'.split()
     convert = lambda spec: ''.join(c if i == 0 else c + c for i, c in enumerate(spec))
     filename_pattern = re.compile('(?P<spec>(c|d|s|f|t)[0-9a-f]{3})\.png')
     icons = {}
@@ -70,6 +62,5 @@ def main(global_config, **settings):
         send_mimetype="text/plain",
         extension='tab',
         name='tab-separated values'), IParameter)
-    config.register_adapter(GeoJsonFeature, IParameter)
 
     return config.make_wsgi_app()

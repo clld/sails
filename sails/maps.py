@@ -1,6 +1,6 @@
-from clld.web.maps import ParameterMap, Map, CombinationMap, Layer
+from clld.web.maps import ParameterMap, Map, CombinationMap
 
-from sails.adapters import GeoJsonLects, GeoJsonCDE
+from sails.adapters import GeoJsonCDE
 
 
 def map_params(req):
@@ -34,13 +34,6 @@ class LanguageMap(Map):
         return res
 
 
-class FamilyMap(Map):
-    def get_options(self):
-        return {
-            'icons': 'sailslettericons',
-        }
-
-
 class CombinedMap(CombinationMap):
     __geojson__ = GeoJsonCDE
 
@@ -53,4 +46,3 @@ class CombinedMap(CombinationMap):
 def includeme(config):
     config.register_map('languages', LanguageMap)
     config.register_map('parameter', FeatureMap)
-    config.register_map('family', FamilyMap)

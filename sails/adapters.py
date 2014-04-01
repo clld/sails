@@ -35,20 +35,6 @@ class GeoJsonFeature(GeoJsonParameter):
             'value_name': value.domainelement.name}
 
 
-class GeoJsonLects(GeoJsonLanguages):
-    def feature_iterator(self, ctx, req):
-        for language in ctx.languages:
-            yield language
-
-    def feature_properties(self, ctx, req, language):
-        if hasattr(ctx, 'icon_url'):
-            # special handling for domain elements of feature combinations
-            return {'icon': ctx.icon_url}
-
-    def get_coordinates(self, language):
-        return pacific_centered_coordinates(language)
-
-
 class GeoJsonCDE(GeoJsonCombinationDomainElement):
     def get_coordinates(self, language):
         return pacific_centered_coordinates(language)

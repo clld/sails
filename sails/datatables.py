@@ -3,6 +3,7 @@ from sqlalchemy.orm import joinedload, joinedload_all
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.web.util.helpers import linked_contributors, linked_references, external_link
+from clld.web.util.htmllib import HTML
 
 from clld.web import datatables
 from clld.web.datatables.base import (
@@ -27,6 +28,7 @@ class LanguageIdCol(Col):
         item = self.get_obj(item)
         return '' if item.id.startswith('NOCODE') else item.id
 
+
 class _FeatureDomainCol(Col):
     def __init__(self, *args, **kw):
         super(_FeatureDomainCol, self).__init__(*args, **kw)
@@ -42,17 +44,6 @@ class _FeatureDomainCol(Col):
 class FeatureDomainCol(_FeatureDomainCol):
     def format(self, item):
         return item.featuredomain.name
-
-
-class FamilyCol(Col):
-    def format(self, item):
-        return item.family.name
-
-    def order(self):
-        return Family.name
-
-    def search(self, qs):
-        return Family.name.contains(qs)
 
 
 class Features(datatables.Parameters):
@@ -79,7 +70,6 @@ class Languages(datatables.Languages):
         return [
             LinkCol(self, 'Name', model_col=sailsLanguage.name),
             LanguageIdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id),
-            #FamilyCol(self, 'Family'),
             Col(self, 'Family', model_col=Family.name, get_object=lambda i: i.family),
             Col(self, 'Features', model_col=sailsLanguage.representation),
             LinkToMapCol(self, 'm'),

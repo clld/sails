@@ -1,4 +1,6 @@
-sails.NumberedDivIcon = L.Icon.extend({
+SAILS = {};
+
+SAILS.NumberedDivIcon = L.Icon.extend({
     options: {
         number: '',
         className: 'my-div-icon'
@@ -23,11 +25,11 @@ sails.NumberedDivIcon = L.Icon.extend({
 });
 
 CLLD.MapIcons['sailslettericons'] = function(feature, size) {
-    return new sails.NumberedDivIcon({
+    return new SAILS.NumberedDivIcon({
         iconUrl: url == feature.properties.icon,
         iconSize: [size, size],
         iconAnchor: [Math.floor(size/2), Math.floor(size/2)],
         popupAnchor: [0, 0],
         number: feature.properties.number
     });
-}
+};
