@@ -44,7 +44,7 @@ The South American Indigenous Language Structures (SAILS) is a large database of
 <p>
 SAILS Online is a publication, published by the
 ${h.external_link('http://www.eva.mpg.de', label='Max Planck Institute for Evolutionary Anthropology')}, by an authored team from the
-${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University')}.
+${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University Nijmegen')}.
 </p>
 
 <h3>How to use SAILS Online</h3>
@@ -79,7 +79,7 @@ and look forward to your comments, feedback and questions.
 
 <h3>Acknowledgements</h3>
 <p>
-SAILS Online was supported by funding from ERC, KNAW and Radboud University.
+SAILS Online was supported by funding from ERC, KNAW and Radboud University Nijmegen.
 <table>
 <tr>
 <td>
