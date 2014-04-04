@@ -26,6 +26,7 @@ ${h.map_marker_img(req, de)}
 </div>
 
 <h2>Feature ${ctx.id}: ${ctx.name}</h2>
+<div>${h.alt_representations(req, ctx, doc_position='right', exclude=['snippet.html'])|n}</div>
 
 <dl>
 <dt>Feature Domain:</dt>

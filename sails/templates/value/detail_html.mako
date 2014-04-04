@@ -13,7 +13,7 @@
 <dt>Value:</dt>
 <dd>${ctx.domainelement.name}</dd>
 <dt>Datapoint contributed by:</dt>
-<dd>${ctx.contributor}</dd>
+<dd>${ctx.contributed_datapoint}</dd>
 <dt>Comment:</dt>
 <dd>${ctx.comment}</dd>
 <dt>Source:</dt>

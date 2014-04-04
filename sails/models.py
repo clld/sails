@@ -43,7 +43,7 @@ class sailsValue(Value, CustomModelMixin):
     comment = Column(Unicode)
     description = Column(Unicode)
     example = Column(Unicode)
-
+    contributed_datapoint = Column(Unicode)
 
 class FeatureDomain(Base, IdNameDescriptionMixin, Versioned):
     pass

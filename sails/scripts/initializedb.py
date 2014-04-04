@@ -284,6 +284,7 @@ def main(args):
             comment=ld["comment"],
             example=ld["example"],
             valueset=valueset,
+            contributed_datapoint=ld["contributor"]
         )
 
     #import codecs
