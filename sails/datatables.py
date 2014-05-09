@@ -17,7 +17,7 @@ from sails.models import FeatureDomain, Feature, sailsLanguage, Family, sailsVal
 class FeatureIdCol(IdCol):
     def search(self, qs):
         if self.model_col:
-            return self.model_col.contains(qs)
+            return self.model_col.contains(qs.upper())
 
     def order(self):
         return Feature.sortkey_str, Feature.sortkey_int
@@ -114,13 +114,13 @@ class Datapoints(Values):
                     get_object=lambda i: i.valueset.language)]
         elif self.language:
             cols = [
-                LinkCol(
-                    self, 'Feature',
-                    model_col=common.Parameter.name,
-                    get_object=lambda i: i.valueset.parameter),
                 FeatureIdCol(
                     self, 'Feature Id',
                     sClass='left', model_col=common.Parameter.id,
+                    get_object=lambda i: i.valueset.parameter),
+                LinkCol(
+                    self, 'Feature',
+                    model_col=common.Parameter.name,
                     get_object=lambda i: i.valueset.parameter)]
 
         cols = cols + [

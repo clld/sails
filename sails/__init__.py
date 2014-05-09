@@ -49,7 +49,7 @@ def main(global_config, **settings):
         ('parameters', partial(menu_item, 'parameters', label='Features')),
         ('languages', partial(menu_item, 'languages')),
         ('sources', partial(menu_item, 'sources')),
-        ('contributions', partial(menu_item, 'contributions', label="Authors")),
+        ('contributions', partial(menu_item, 'contributions', label="Designers")),
     )
     config.include('clldmpg')
     config.include('sails.adapters')
