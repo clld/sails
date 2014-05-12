@@ -13,6 +13,7 @@ class Tests(TestWithApp):
         res = self.app.get('/', status=200)
 
     def test_misc(self):
+        self.app.get('/parameters/AND2.tab')
         self.app.get_html('/parameters/NP740')
         self.app.get_html('/parameters/NP740?z=5&lat=0.5&lng=0.5')
         self.app.get_html('/parameters/NP740?z=ff&lat=pp&lng=yy')
