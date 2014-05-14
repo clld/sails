@@ -47,7 +47,9 @@ type="button" class="btn btn-mini expand-collapse" data-toggle="collapse" data-t
 </td>
 <td>
                     % if de.languages:
-<img height="20" width="20" src="${de.icon.url(request)}"/>
+                <%util:iconselect id="iconselect${str(i)}" param="v${str(i)}" placement="right" tag="span">
+                    <img height="20" width="20" src="${de.icon.url(request)}"/>
+                </%util:iconselect>
                     % endif
 </td>
 <td>

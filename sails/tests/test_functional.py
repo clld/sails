@@ -19,7 +19,7 @@ class Tests(TestWithApp):
         self.app.get_html('/parameters/NP740?z=ff&lat=pp&lng=yy')
         self.app.get_json('/parameters/NP740.solr.json')
         self.app.get_json('/parameters/NP740.geojson?domainelement=NP740-1')
-        self.app.get_html('/combinations/AND3_AND4')
+        self.app.get_html('/combinations/AND3_AND4?v1=cff4400')
         self.app.get_html('/sources/sdricharabela')
         self.app.get_html('/languages')
         self.app.get_dt('/values?parameter=AND1')

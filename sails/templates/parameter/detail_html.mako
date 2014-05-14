@@ -9,20 +9,20 @@
 </%block>
 
 <div class="span4" style="float: right; margin-top: 1em;">
-<%util:well title="Values">
-<table class="table table-condensed">
+    <%util:well title="Values">
+        <table class="table table-condensed">
             % for de in ctx.domain:
-<tr>
-<td title="click to select a different map marker" id="iconselect${str(de.number)}" data-toggle="popover" data-placement="left">
-${h.map_marker_img(req, de)}
-</td>
-<td>${de.name}</td>
-<td>${de.description}</td>
-<td class="right">${len(de.values)}</td>
-</tr>
+            <tr>
+                <%util:iconselect id="iconselect${str(de.number)}" param="v${str(de.number)}">
+                    ${h.map_marker_img(req, de)}
+                </%util:iconselect>
+                <td>${de.name}</td>
+                <td>${de.description}</td>
+                <td class="right">${len(de.values)}</td>
+            </tr>
             % endfor
-</table>
-</%util:well>
+        </table>
+    </%util:well>
 </div>
 
 <h2>Feature ${ctx.id}: ${ctx.name}</h2>
