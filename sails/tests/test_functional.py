@@ -28,3 +28,4 @@ class Tests(TestWithApp):
         self.app.get_dt('/parameters?sSearch_2=And&iSortingCols=1&iSortCol_0=2')
         self.app.get_html('/contributions')
         self.app.get_dt('/values?language=qux')
+        self.app.get_html('/values.map.html?parameter=AND1&sEcho=1')

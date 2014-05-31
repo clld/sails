@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from sqlalchemy.orm import joinedload, joinedload_all
-from clld.interfaces import ILanguage, IParameter, IIndex
+from clld.interfaces import ILanguage, IParameter, IIndex, IValue
 from clld.web.adapters.base import Index
 from clld.web.adapters.geojson import (
     GeoJsonParameter,
@@ -50,15 +50,32 @@ class MapView(Index):
     mimetype = str('text/vnd.clld.map+html')
     send_mimetype = str('text/html')
     template = 'language/map_html.mako'
+    geojson_impl = _GeoJsonSelectedLanguages
+
+    def get_languages(self, ctx, req):
+        return list(ctx.get_query(limit=8000))
 
     def template_context(self, ctx, req):
-        languages = list(ctx.get_query(limit=8000))
+        languages = self.get_languages(ctx, req)
         return {
             'map': SelectedLanguagesMap(
-                ctx, req, languages, geojson_impl=_GeoJsonSelectedLanguages),
+                ctx, req, languages, geojson_impl=self.geojson_impl),
             'languages': languages}
+
+
+class GeoJsonSelectedValues(GeoJsonFeature):
+    def feature_iterator(self, ctx, req):
+        return ctx.get_query(limit=8000)
+
+
+class ValueMapView(MapView):
+    geojson_impl = GeoJsonSelectedValues
+
+    def get_languages(self, ctx, req):
+        return [v.valueset.language for v in ctx.get_query(limit=8000)]
 
 
 def includeme(config):
     config.register_adapter(GeoJsonFeature, IParameter)
     config.register_adapter(MapView, ILanguage, IIndex)
+    config.register_adapter(ValueMapView, IValue, IIndex)
