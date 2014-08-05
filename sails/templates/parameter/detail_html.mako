@@ -1,6 +1,8 @@
 <%inherit file="../${context.get('request').registry.settings.get('clld.app_template', 'app.mako')}"/>
 <%namespace name="util" file="../util.mako"/>
 <%! active_menu_item = "parameters" %>
+<% values = request.get_datatable('values', h.models.Value, parameter=ctx) %>
+
 <%block name="title">Feature ${ctx.id}: ${ctx.name}</%block>
 
 <%block name="head">
@@ -62,7 +64,7 @@ ${select.render()}
 <br style="clear: right"/>
 
 % if request.map:
-${request.map.render()}
+${request.get_map('parameter', dt=values, col='Family').render()}
 % endif
 
-${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
+${values.render()}

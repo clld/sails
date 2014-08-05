@@ -5,13 +5,12 @@ from clld.interfaces import ILanguage, IParameter, IIndex, IValue
 from clld.web.adapters.base import Index
 from clld.web.adapters.geojson import (
     GeoJsonParameter,
-    GeoJsonLanguages,
     GeoJsonCombinationDomainElement,
     pacific_centered_coordinates,
 )
 from clld.web.maps import GeoJsonSelectedLanguages, SelectedLanguagesMap
 from clld.db.meta import DBSession
-from clld.db.models.common import Value, ValueSet, DomainElement, Language, Parameter
+from clld.db.models.common import Value, ValueSet, DomainElement
 
 
 class GeoJsonFeature(GeoJsonParameter):

@@ -21,9 +21,9 @@ from clld.db.models.common import (
 from sails import interfaces as sails_interfaces
 
 
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # specialized common mapper classes
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @implementer(sails_interfaces.IFamily)
 class Family(Base, IdNameDescriptionMixin, Versioned):
     pass
@@ -41,9 +41,9 @@ class sailsLanguage(Language, CustomModelMixin):
 class sailsValue(Value, CustomModelMixin):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
     comment = Column(Unicode)
-    description = Column(Unicode)
     example = Column(Unicode)
     contributed_datapoint = Column(Unicode)
+
 
 class FeatureDomain(Base, IdNameDescriptionMixin, Versioned):
     pass
@@ -67,8 +67,6 @@ class Feature(Parameter, CustomModelMixin, Versioned):
     """Parameters in SAILS are called feature. They are always related to one Designer.
     """
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
-    id = Column(String(50), unique=True)
-    name = Column(String(600), unique=True)
     vdoc = Column(String)
     representation = Column(Integer)
     featuredomain_pk = Column(Integer, ForeignKey('featuredomain.pk'))

@@ -1,4 +1,6 @@
-SAILS = {};
+SAILS = {
+    getFamily: function(props){return props.language.family_pk;}
+};
 
 SAILS.NumberedDivIcon = L.Icon.extend({
     options: {

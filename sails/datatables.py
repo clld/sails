@@ -2,16 +2,12 @@ from sqlalchemy.orm import joinedload, joinedload_all
 
 from clld.db.meta import DBSession
 from clld.db.models import common
-from clld.web.util.helpers import linked_contributors, linked_references, external_link
-from clld.web.util.htmllib import HTML
 
 from clld.web import datatables
-from clld.web.datatables.base import (
-    DataTable, Col, filter_number, LinkCol, DetailsRowLinkCol, IdCol, LinkToMapCol
-)
+from clld.web.datatables.base import Col, LinkCol, DetailsRowLinkCol, IdCol, LinkToMapCol
 from clld.web.datatables.value import Values, ValueNameCol
 
-from sails.models import FeatureDomain, Feature, sailsLanguage, Family, sailsValue, Designer
+from sails.models import FeatureDomain, Feature, sailsLanguage, Family, Designer
 
 
 class FeatureIdCol(IdCol):
@@ -32,7 +28,8 @@ class LanguageIdCol(Col):
 class _FeatureDomainCol(Col):
     def __init__(self, *args, **kw):
         super(_FeatureDomainCol, self).__init__(*args, **kw)
-        self.choices = [a.name for a in DBSession.query(FeatureDomain).order_by(FeatureDomain.name)]
+        self.choices = [a.name for a in
+                        DBSession.query(FeatureDomain).order_by(FeatureDomain.name)]
 
     def order(self):
         return FeatureDomain.name
@@ -56,10 +53,23 @@ class Features(datatables.Parameters):
             FeatureIdCol(self, 'Id', sClass='left', model_col=Feature.id),
             LinkCol(self, 'Feature', model_col=Feature.name),
             FeatureDomainCol(self, 'Domain'),
-            Col(self, 'Designer', model_col=Designer.contributor, get_object=lambda i: i.designer), # get_object=lambda i: i.feature.designer),
+            Col(self, 'Designer',
+                model_col=Designer.contributor,
+                get_object=lambda i: i.designer),
             Col(self, 'Languages', model_col=Feature.representation),
             DetailsRowLinkCol(self, 'd', button_text='Values'),
         ]
+
+
+class FamilyCol(Col):
+    def __init__(self, *args, **kw):
+        kw['choices'] = [
+            (f.pk, f.name) for f in DBSession.query(Family).order_by(Family.name)]
+        kw['model_col'] = Family.name
+        Col.__init__(self, *args, **kw)
+
+    def search(self, qs):
+        return Family.pk == int(qs)
 
 
 class Languages(datatables.Languages):
@@ -70,7 +80,7 @@ class Languages(datatables.Languages):
         return [
             LinkCol(self, 'Name', model_col=sailsLanguage.name),
             LanguageIdCol(self, 'ISO-639-3', sClass='left', model_col=sailsLanguage.id),
-            Col(self, 'Family', model_col=Family.name, get_object=lambda i: i.family),
+            FamilyCol(self, 'Family', get_object=lambda i: i.family),
             Col(self, 'Features', model_col=sailsLanguage.representation),
             LinkToMapCol(self, 'm'),
         ]
@@ -94,6 +104,12 @@ class Datapoints(Values):
                 joinedload_all(common.Value.valueset, common.ValueSet.parameter),
                 joinedload(common.Value.domainelement),
             )
+        elif self.parameter:
+            query = query.outerjoin(Family)\
+                .options(joinedload_all(
+                    common.Value.valueset,
+                    common.ValueSet.language,
+                    sailsLanguage.family))
         return query
 
     def col_defs(self):
@@ -111,7 +127,10 @@ class Datapoints(Values):
                 LanguageIdCol(
                     self, 'ISO-639-3',
                     model_col=common.Language.id,
-                    get_object=lambda i: i.valueset.language)]
+                    get_object=lambda i: i.valueset.language),
+                FamilyCol(
+                    self, 'Family',
+                    get_object=lambda i: i.valueset.language.family)]
         elif self.language:
             cols = [
                 FeatureIdCol(
