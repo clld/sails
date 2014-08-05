@@ -19,7 +19,7 @@ Run
     python sails/scripts/unfreeze.py sqlite.ini
     pserve sqlite.ini
 
-or equivalent to start the eWAVE web app accessible at
+or equivalent to start the SAILS web app accessible at
 
     http://localhost:6543
 
