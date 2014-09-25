@@ -3,13 +3,13 @@
 <%! active_menu_item = "parameters" %>
 
 
-<h2>${_('Datapoint')} ${h.link(request, ctx.language)} / ${h.link(request, ctx.parameter)}</h2>
+<h2>${_('Datapoint')} ${h.link(request, ctx.valueset.language)} / ${h.link(request, ctx.valueset.parameter)}</h2>
 
 <dl>
 <dt>Language:</dt>
-<dd>${h.link(request, ctx.language)}</dd>
+<dd>${h.link(request, ctx.valueset.language)}</dd>
 <dt>Feature:</dt>
-<dd>${h.link(request, ctx.parameter)} designed by ${ctx.parameter.designer.contributor}</dd>
+<dd>${h.link(request, ctx.valueset.parameter)} designed by ${ctx.valueset.parameter.designer.contributor}</dd>
 <dt>Value:</dt>
 <dd>${ctx.domainelement.name}</dd>
 <dt>Datapoint contributed by:</dt>
@@ -28,7 +28,7 @@
 </tr>
 </thead>
 <tbody>
-        % for de in ctx.parameter.domain:
+        % for de in ctx.valueset.parameter.domain:
 <tr>
 <td>${de.name}</td>
 <td>${de.description}</td>
