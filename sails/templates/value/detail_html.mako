@@ -16,8 +16,10 @@
 <dd>${ctx.contributed_datapoint}</dd>
 <dt>Comment:</dt>
 <dd>${ctx.comment}</dd>
+% if ctx.valueset.source:
 <dt>Source:</dt>
-<dd>${ctx.source}</dd>
+<dd>${ctx.valueset.source}</dd>
+% endif
 <dt>Legal Values and Meanings:</dt>
 <dd>
 
