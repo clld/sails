@@ -10,8 +10,8 @@ WebTest==2.0.15
 alembic==0.6.5
 argparse==1.2.1
 beautifulsoup4==4.3.2
-clld==0.16
-clldmpg==0.2
+clld==0.19
+clldmpg==0.5
 colander==1.0b1
 future==0.12.4
 html5lib==0.999
