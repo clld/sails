@@ -7,7 +7,7 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'clld>=0.19',
+    'clld>=0.19.1',
     'clldmpg>=0.5',
     'pyramid',
     'SQLAlchemy',
