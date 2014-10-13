@@ -48,3 +48,4 @@ class CombinedMap(CombinationMap):
 def includeme(config):
     config.register_map('languages', LanguageMap)
     config.register_map('parameter', FeatureMap)
+    config.register_map('combination', CombinedMap)

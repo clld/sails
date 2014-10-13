@@ -14,6 +14,11 @@ from clld.web.icon import Icon
 from sails import models
 
 
+_ = lambda s: s
+_('Parameters')
+_('Parameter')
+
+
 def map_marker(ctx, req):
     """to allow for user-selectable markers, we have to look up a possible custom
     selection from the url params.

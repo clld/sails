@@ -50,16 +50,13 @@ def parameter_detail_tab(context=None, request=None, **kw):
 
 
 def combination_detail_html(context=None, request=None, **kw):
-    """feature combination view
-    """
+    """feature combination view"""
     for i, de in enumerate(context.domain):
         name = request.params.get('v%s' % i)
         if name in ICON_MAP:
             de.icon = ICON_MAP[name]
 
-    return dict(
-        select=CombinationMultiSelect(request, combination=context),
-        map=CombinedMap(context, request))
+    return dict(iconselect=True)
 
 
 def markup_feature_desc(req, desc):
