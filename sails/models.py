@@ -30,7 +30,7 @@ class Family(Base, IdNameDescriptionMixin, Versioned):
 
 
 @implementer(interfaces.ILanguage)
-class sailsLanguage(Language, CustomModelMixin):
+class sailsLanguage(CustomModelMixin, Language):
     pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
     family_pk = Column(Integer, ForeignKey('family.pk'))
     family = relationship(Family, backref=backref("languages", order_by="Language.name"))
@@ -38,7 +38,7 @@ class sailsLanguage(Language, CustomModelMixin):
 
 
 @implementer(interfaces.IValue)
-class sailsValue(Value, CustomModelMixin):
+class sailsValue(CustomModelMixin, Value):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
     comment = Column(Unicode)
     example = Column(Unicode)
@@ -50,7 +50,7 @@ class FeatureDomain(Base, IdNameDescriptionMixin, Versioned):
 
 
 @implementer(interfaces.IContribution)
-class Designer(Contribution, CustomModelMixin, Versioned):
+class Designer(CustomModelMixin, Contribution, Versioned):
     """Contributions in SAILS are designers. These comprise a set of
     features with corresponding values and a descriptive text.
     """
@@ -63,7 +63,7 @@ class Designer(Contribution, CustomModelMixin, Versioned):
 
 
 @implementer(interfaces.IParameter)
-class Feature(Parameter, CustomModelMixin, Versioned):
+class Feature(CustomModelMixin, Parameter, Versioned):
     """Parameters in SAILS are called feature. They are always related to one Designer.
     """
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
