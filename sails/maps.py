@@ -1,7 +1,5 @@
 from clld.web.maps import ParameterMap, Map, CombinationMap, FilterLegend
 
-from sails.adapters import GeoJsonCDE
-
 
 class FeatureMap(ParameterMap):
     def __init__(self, ctx, req, eid='map', col=None, dt=None):
@@ -39,8 +37,6 @@ class LanguageMap(Map):
 
 
 class CombinedMap(CombinationMap):
-    __geojson__ = GeoJsonCDE
-
     def get_options(self):
         return {'icon_size': 20, 'hash': True, 'center': {"lon": 289.564764, "lat": 1.745725}}
 

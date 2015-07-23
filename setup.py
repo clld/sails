@@ -1,9 +1,13 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'clld>=0.28',
-    'clldmpg>=0.5',
-    ]
+    'clldmpg>=1.0.0',
+]
+
+tests_require = [
+    'WebTest',
+    'mock==1.0',
+]
 
 setup(name='sails',
       version='0.0',
@@ -23,10 +27,9 @@ setup(name='sails',
       include_package_data=True,
       zip_safe=False,
       install_requires=requires,
-      tests_require=requires,
+      tests_require=tests_require,
       test_suite="sails",
       entry_points="""\
       [paste.app_factory]
       main = sails:main
-      """,
-      )
+      """)
