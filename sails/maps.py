@@ -27,7 +27,7 @@ class LanguageMap(Map):
         Map.__init__(self, ctx, req, eid=eid)
 
     def get_options(self):
-        return {'center': {"lon": -70.564764, "lat": 1.745725}}
+        return {'center': {"lon": 289.564764, "lat": 1.745725}}
 
     def get_legends(self):
         for legend in Map.get_legends(self):
