@@ -1,5 +1,4 @@
 import re
-from functools import partial
 
 from path import path
 from pyramid.config import Configurator
@@ -7,7 +6,6 @@ from clld.interfaces import (
     IParameter, IMapMarker, IDomainElement, IValue, ILanguage, IIconList,
 )
 from clld.web.adapters.base import adapter_factory
-from clld.web.app import menu_item
 from clld.web.icon import Icon
 
 
@@ -18,6 +16,7 @@ from sails import models
 _ = lambda s: s
 _('Parameters')
 _('Parameter')
+_('Contributions')
 
 
 def map_marker(ctx, req):
@@ -41,8 +40,6 @@ def map_marker(ctx, req):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    settings['sitemaps'] = 'contribution parameter source valueset'.split()
-
     convert = lambda spec: ''.join(c if i == 0 else c + c for i, c in enumerate(spec))
     filename_pattern = re.compile('(?P<spec>(c|d|s|f|t)[0-9a-f]{3})\.png')
     icons = []
@@ -57,13 +54,6 @@ def main(global_config, **settings):
     config.include('clldmpg')
     config.registry.registerUtility(map_marker, IMapMarker)
     config.registry.registerUtility(icons, IIconList)
-    config.register_menu(
-        ('dataset', partial(menu_item, 'dataset', label='Home')),
-        ('parameters', partial(menu_item, 'parameters', label='Features')),
-        ('languages', partial(menu_item, 'languages')),
-        ('sources', partial(menu_item, 'sources')),
-        ('contributions', partial(menu_item, 'contributions', label="Designers")),
-    )
     config.register_adapter(adapter_factory(
         'parameter/detail_tab.mako',
         mimetype='application/vnd.clld.tab',
