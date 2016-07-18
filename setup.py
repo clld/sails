@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'clld>=1.5.0,<2.0.0',
-    'clldmpg>=1.1.1',
+    'clld>=3.0.2',
+    'clldmpg>=2.0.0',
 ]
 
 tests_require = [
     'WebTest',
-    'mock==1.0',
+    'mock',
 ]
 
 setup(name='sails',

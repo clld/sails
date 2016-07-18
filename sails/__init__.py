@@ -1,12 +1,12 @@
 import re
 
-from path import path
 from pyramid.config import Configurator
 from clld.interfaces import (
     IParameter, IMapMarker, IDomainElement, IValue, ILanguage, IIconList,
 )
 from clld.web.adapters.base import adapter_factory
 from clld.web.icon import Icon
+from clldutils.path import Path
 
 
 # we must make sure custom models are known at database initialization!
@@ -44,9 +44,9 @@ def main(global_config, **settings):
     filename_pattern = re.compile('(?P<spec>(c|d|s|f|t)[0-9a-f]{3})\.png')
     icons = []
     for name in sorted(
-        path(__file__).dirname().joinpath('static', 'icons').files()
-    ):
-        m = filename_pattern.match(name.splitall()[-1])
+            [fn.name for fn in
+             Path(__file__).parent.joinpath('static', 'icons').glob('*.png')]):
+        m = filename_pattern.match(name)
         if m:
             icons.append(Icon(convert(m.group('spec'))))
 

@@ -1,6 +1,7 @@
 import re
-from path import path
+from clldutils.path import Path
 import sails
+
 
 class Icons(object):
     filename_pattern = re.compile('(?P<spec>(c|d|s|f|t)[0-9a-f]{3})\.png')
@@ -15,9 +16,9 @@ class Icons(object):
     def __init__(self):
         self._icons = []
         for name in sorted(
-            path(sails.__file__).dirname().joinpath('static', 'icons').files()
-        ):
-            m = self.filename_pattern.match(name.splitall()[-1])
+                [fn.name for fn in
+                Path(sails.__file__).parent.joinpath('static', 'icons').glob('*.png')]):
+            m = self.filename_pattern.match(name)
             if m:
                 self._icons.append(Icons.id(m.group('spec')))
 
@@ -28,9 +29,8 @@ class Icons(object):
         icons_t = sorted([icon for icon in self._icons if icon.startswith(t)])
         icons_selection = [icons_t[i] for i in xrange(0, len(icons_t), len(icons_t)/len(xs))]
         return dict(zip(xs, icons_selection))
-        
+
     def iconizeall(self, xs):
         icons_t = sorted([icon for icon in self._icons])
         icons_selection = [icons_t[i] for i in xrange(0, len(icons_t), len(icons_t)/len(xs))]
         return dict(zip(xs, icons_selection))
-        

@@ -1,4 +1,4 @@
-from path import path
+from clldutils.path import Path
 
 from clld.tests.util import TestWithApp
 from clld.db.meta import DBSession
@@ -7,8 +7,7 @@ import sails
 
 
 class Tests(TestWithApp):
-    __cfg__ = path(sails.__file__).dirname().joinpath('..', 'development.ini').abspath()
-    __setup_db__ = False
+    __cfg__ = Path(sails.__file__).parent.joinpath('..', 'development.ini').resolve()
 
     def test_home(self):
         res = self.app.get('/', status=200)

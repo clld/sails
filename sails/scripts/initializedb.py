@@ -5,7 +5,6 @@ import re
 import transaction
 from pytz import utc
 from datetime import date, datetime
-from path import path
 
 from clld.scripts.util import (
     initializedb, Data, gbs_func, bibtex2source, glottocodes_by_isocode,
@@ -14,13 +13,14 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.db.util import compute_language_sources
 from clld.lib.bibtex import Record
-from clld.util import slug
+from clldutils.misc import slug
+from clldutils.path import Path
 
 from sails import models
 from sails.scripts import issues
 
 
-DATA_DIR = path('data')
+DATA_DIR = Path('data')
 reline = re.compile("[\\n\\r]")
 refield = re.compile("\\t")
 
@@ -87,10 +87,8 @@ def rangify(ranges):
 
 
 def loadunicode(fn, encoding="utf-8"):
-    f = open(DATA_DIR.joinpath(fn), "r")
-    a = f.read()
-    f.close()
-    return unicode(a, encoding)
+    with DATA_DIR.joinpath(fn).open(encoding=encoding) as fp:
+        return fp.read()
 
 
 reisobrack = re.compile("\[([a-z][a-z][a-z]|NOCODE\_[A-Z][^\s\]]+)\]")
@@ -124,7 +122,7 @@ def main(args):
     lons = dict([(d['iso-639-3'], d['lon']) for d in dp])
     lats = dict([(d['iso-639-3'], d['lat']) for d in dp])
 
-    tabfns = [fn.basename() for fn in DATA_DIR.listdir('sails_*.tab')]
+    tabfns = [fn.name for fn in DATA_DIR.glob('sails_*.tab')]
     print "Sheets found", tabfns
     ldps = [ld for fn in tabfns for ld in dtab(fn)]
     ldps = [dict([(k, v.replace(".", "-") if k in ['feature_alphanumid', 'value'] else v)

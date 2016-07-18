@@ -1,9 +1,9 @@
 from clld.web.assets import environment
-from path import path
+from clldutils.path import Path
 
 import sails
 
 
 environment.append_path(
-    path(sails.__file__).dirname().joinpath('static'), url='/sails:static/')
+    Path(sails.__file__).parent.joinpath('static').as_posix(), url='/sails:static/')
 environment.load_path = list(reversed(environment.load_path))
