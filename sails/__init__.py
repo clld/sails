@@ -18,7 +18,6 @@ _('Parameters')
 _('Parameter')
 _('Contributions')
 
-
 def map_marker(ctx, req):
     """to allow for user-selectable markers, we have to look up a possible custom
     selection from the url params.

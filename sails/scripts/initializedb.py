@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import sys
 import re
+import io
 
 import transaction
 from pytz import utc
@@ -24,6 +25,9 @@ DATA_DIR = Path('data')
 reline = re.compile("[\\n\\r]")
 refield = re.compile("\\t")
 
+def savu(txt, fn):
+    with io.open(fn, 'w', encoding="utf-8") as fp:
+        fp.write(txt)
 
 def dtab(fn="sails_neele.tab", encoding="utf-8"):
     lines = reline.split(loadunicode(fn, encoding="utf-8"))
@@ -271,6 +275,7 @@ def main(args):
                 parameter=data['Feature'][fid])
     DBSession.flush()
 
+    done = set()
     for ld in ldps:
         parameter = data['Feature'][ld['feature_alphanumid']]
         language = data['sailsLanguage'][ld['language_id']]
@@ -302,6 +307,7 @@ def main(args):
             valueset=valueset,
             contributed_datapoint=ld["contributor"]
         )
+        done.add(id_)
 
     # Sources
     sources = [ktfbib(bibsource) for ld in ldps if ld.get('bibsources') for bibsource in ld['bibsources'].split(",,,")]
@@ -345,7 +351,22 @@ def main(args):
     common.Editor(dataset=dataset, contributor=editor, ord=0)
     DBSession.flush()
 
+    #To CLDF
+    cldf = {}
+    for ld in ldps:
+        parameter = data['Feature'][ld['feature_alphanumid']]
+        language = data['sailsLanguage'][ld['language_id']]
+        id_ = '%s-%s' % (parameter.id, language.id)
+        if not id_ in done:
+            continue
+        dt = (lgs[ld['language_id']], ld['language_id'], ld['feature_alphanumid'] + ". " + ld['feature_name'], ld["value"], ld["comment"])
+        cldf[dt] = None
 
+    tab = lambda rows: u''.join([u'\t'.join(row) + u"\n" for row in rows])
+    savu(tab([("Language", "iso-639-3", "Feature", "Value", "Comment")] + cldf.keys()), "sails.cldf")
+
+
+    
 def prime_cache(args):
     """If data needs to be denormalized for lookup, do that here.
     This procedure should be separate from the db initialization, because
