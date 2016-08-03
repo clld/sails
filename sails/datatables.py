@@ -60,6 +60,19 @@ class Features(datatables.Parameters):
             DetailsRowLinkCol(self, 'd', button_text='Values'),
         ]
 
+class ConstructionValues(datatables.Unitvalues):
+    #def base_query(self, query):
+    #    return super(Unitvalues, self).base_query(query).join(
+    #        Dictionary, Dictionary.pk == Word.dictionary_pk)
+
+    def col_defs(self):
+        name_col = UnitValueNameCol(self, 'value')
+        if self.unitparameter and self.unitparameter.domain:
+            name_col.choices = sorted([de.name for de in self.unitparameter.domain])
+        return [
+            name_col,
+            LinkCol(self, 'unit', get_obj=lambda i: i.unit, model_col=common.Unit.name),
+        ]
 
 class FamilyCol(Col):
     def __init__(self, *args, **kw):
@@ -165,3 +178,4 @@ def includeme(config):
     config.register_datatable('values', Datapoints)
     config.register_datatable('languages', Languages)
     config.register_datatable('parameters', Features)
+    config.register_datatable('unitvalues', ConstructionValues)

@@ -2,5 +2,7 @@ from zope.interface import Interface
 
 
 class IFamily(Interface):
-    """marker
-    """
+    """marker"""
+
+class IConstruction(Interface):
+    """marker"""

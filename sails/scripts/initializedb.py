@@ -7,8 +7,9 @@ import transaction
 from pytz import utc
 from datetime import date, datetime
 
+#, glottocodes_by_isocode,
 from clld.scripts.util import (
-    initializedb, Data, gbs_func, bibtex2source, glottocodes_by_isocode,
+    initializedb, Data, gbs_func, bibtex2source
 )
 from clld.db.meta import DBSession
 from clld.db.models import common
@@ -19,11 +20,18 @@ from clldutils.path import Path
 
 from sails import models
 from sails.scripts import issues
-
+from pyglottolog.api import Glottolog
+import getpass
 
 DATA_DIR = Path('data')
 reline = re.compile("[\\n\\r]")
 refield = re.compile("\\t")
+
+GLOTTOLOG_REPOS = Path(grambank.__file__).parent.parent.parent.parent.joinpath(
+    'glottolog3', 'glottolog') \
+    if getpass.getuser() in ['robert', 'shh\\forkel'] \
+    else Path('C:\\Python27\\glottolog\\')  # add your path to the glottolog repos clone here!
+
 
 def savu(txt, fn):
     with io.open(fn, 'w', encoding="utf-8") as fp:
@@ -89,6 +97,13 @@ def rangify(ranges):
         n = n * x
     return [r[i] for i in reversed(range(len(r)))]
 
+def sortinfo(fids, redigit = re.compile('([0-9]+)')):
+    fidstr = dict([(fid, '--'.join([c for c in redigit.split(fid) if c.strip() and (c != "-") and not c.isdigit()])) for fid in fids])
+    fidintdata = dict([(fid, [int(c) for c in redigit.split(fid) if c.isdigit()]) for fid in fids])
+    fidintranges = opv(grp2([(i, x) for ii in fidintdata.itervalues() for (i, x) in enumerate(ii)]), max)
+    rmul = rangify([fidintranges[i] for i in range(len(fidintranges))])
+    fidint = opv(fidintdata, lambda ii, rmul=rmul: sum([a * b for (a, b) in zip(ii, rmul)]))
+    return (fidstr, fidint)
 
 def loadunicode(fn, encoding="utf-8"):
     with DATA_DIR.joinpath(fn).open(encoding=encoding) as fp:
@@ -111,7 +126,6 @@ def treetxt(txt):
 
     return paths_to_d(r.iterkeys())
 
-
 def main(args):
     # http://clld.readthedocs.org/en/latest/extending.html
     data = Data(
@@ -119,8 +133,9 @@ def main(args):
         updated=utc.localize(datetime(2013, 12, 12)))
     icons = issues.Icons()
 
-    glottocodes = glottocodes_by_isocode(args.glottolog_dburi)
-
+    languoids = list(Glottolog(GLOTTOLOG_REPOS).languoids())
+    iso_to_gcs = grp2([(l.iso, l.id) for l in languoids]) #glottocodes = glottocodes_by_isocode(args.glottolog_dburi)
+    iso_to_name = {l.iso: l.name for l in languoids}
     #Languages
     dp = dtab("dp.tab")
     lons = dict([(d['iso-639-3'], d['lon']) for d in dp])
@@ -131,9 +146,10 @@ def main(args):
     ldps = [ld for fn in tabfns for ld in dtab(fn)]
     ldps = [dict([(k, v.replace(".", "-") if k in ['feature_alphanumid', 'value'] else v)
                   for (k, v) in ld.iteritems()]) for ld in ldps]
-    lgs = dict([(ld['language_id'], ld['language_name']) for ld in ldps])
+    ldcps = dtab("constructions_data.tab")
+    lgs = dict([(ld['language_id'], ld['language_name'] if ld.has_key('language_name') else iso_to_name[ld['language_id']]) for ld in ldps + ldcps])
     nfeatures = opv(grp2([(ld['language_id'], ld['feature_alphanumid'])
-                          for ld in ldps if ld["value"] != "?"]), len)
+                          for ld in ldps + ldcps if ld["value"] != "?"]), len)
 
     # Families
     fp = treetxt(loadunicode('lff.txt') + loadunicode('lof.txt'))
@@ -169,8 +185,8 @@ def main(args):
                 type=common.IdentifierType.iso.value,
                 description=lgs[lgid])
             data.add(common.LanguageIdentifier, lgid, language=lang, identifier=iso)
-        if lgid in glottocodes:
-            gc = glottocodes[lgid]
+        if lgid in iso_to_gcs:
+            gc = iso_to_gcs[lgid]
             gc = data.add(
                 common.Identifier, 'gc' + lgid,
                 id=gc,
@@ -218,17 +234,7 @@ def main(args):
     nlgs = opv(grp2([(ld['feature_alphanumid'], ld['language_id'])
                      for ld in ldps if ld["value"] != "?"]), len)
 
-    redigit = re.compile('([0-9]+)')
-    fidstr = dict([(fid, '--'.join([c for c in redigit.split(fid)
-                                    if c.strip() and (c != "-") and not c.isdigit()]))
-                   for fid in fs.iterkeys()])
-    fidintdata = dict([(fid, [int(c) for c in redigit.split(fid) if c.isdigit()])
-                       for fid in fs.iterkeys()])
-    fidintranges = opv(grp2([(i, x) for ii in fidintdata.itervalues()
-                             for (i, x) in enumerate(ii)]), max)
-    rmul = rangify([fidintranges[i] for i in range(len(fidintranges))])
-    fidint = opv(fidintdata,
-                 lambda ii, rmul=rmul: sum([a * b for (a, b) in zip(ii, rmul)]))
+    (fidstr, fidint) = sortinfo(fs.keys())
     for (fid, f) in fs.iteritems():
         if nlgs[fid] == 0:
             continue
@@ -309,6 +315,55 @@ def main(args):
         )
         done.add(id_)
 
+    fcstrs = dict([(ld['feature_alphanumid'].replace('.', "-"), ld) for ld in dtab("constructions_features.tab")])
+    (fidstr, fidint) = sortinfo(fcstrs.keys())
+    for (fid, ld) in fcstrs.iteritems():
+        data.add(
+            models.sailsUnitParameter, fid,
+            id=fid,
+            name=ld['feature_name'],
+            description=ld['feature_information'],
+            jsondata=dict(vdoc=ld['feature_possible_values']),
+            designer=data["Designer"][f['designer']],
+            dependson=f["depends_on"],
+            featuredomain=data['FeatureDomain'][f["feature_domain"]],
+            sortkey_str=fidstr[fid],
+            sortkey_int=fidint[fid])
+    DBSession.flush()
+
+    #ldcps = dtab("constructions_data.tab")
+    cs = set([(ld['construction_id'], ld['language_id']) for ld in ldcps])
+    for (cid, lid) in cs:
+        language = data['sailsLanguage'][lid]
+        data.add(
+            common.Unit, cid,
+            id=cid,
+            name=cid,
+            language = language) 
+    DBSession.flush()
+        
+    #done = set()
+    dedup = opv(grp2([((ld['construction_id'], ld['feature_alphanumid'].replace('.', "-")), (ld["value"],) + tuple(ld.items())) for ld in ldcps]), max)
+    #for (idd, lds) in dups.iteritems():
+    #    if len(lds) > 1:
+    #        print idd, lds
+    for dld in dedup.itervalues():
+        ld = dict(dld[1:])
+        #print fid, ld['language_id'], ld['construction_id'], "HEJ"
+        fid = ld['feature_alphanumid'].replace('.', "-")
+        language = data['sailsLanguage'][ld['language_id']]
+        construction = data['Unit'][ld['construction_id']]
+        construction_feature = data['sailsUnitParameter'][fid]
+        id_ = '%s-%s' % (construction.id, construction_feature.id)
+        data.add(common.UnitValue, id_, id=id_, name=ld['value'], unit=construction, unitparameter=construction_feature, contribution=construction_feature.designer)
+        #cstrs + cstr_features + languages?
+        #source comment etc
+
+        #done.add(id_)
+    DBSession.flush()
+
+
+        
     # Sources
     sources = [ktfbib(bibsource) for ld in ldps if ld.get('bibsources') for bibsource in ld['bibsources'].split(",,,")]
     for (k, (typ, bibdata)) in sources:

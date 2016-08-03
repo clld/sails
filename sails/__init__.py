@@ -11,6 +11,7 @@ from clldutils.path import Path
 
 # we must make sure custom models are known at database initialization!
 from sails import models
+from sails.interfaces import IConstruction
 
 
 _ = lambda s: s
@@ -59,5 +60,6 @@ def main(global_config, **settings):
         send_mimetype="text/plain",
         extension='tab',
         name='tab-separated values'), IParameter)
-
+    config.register_resource('construction', models.sailsUnitParameter, IConstruction, with_index=True)
+    #config.register_adapter(adapter_factory('family/detail_html.mako'), IFamily)
     return config.make_wsgi_app()

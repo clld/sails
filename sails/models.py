@@ -16,10 +16,11 @@ from clld.db.models.common import (
     Parameter,
     Contribution,
     Value,
+    UnitValue,
+    UnitParameter,
     IdNameDescriptionMixin,
 )
 from sails import interfaces as sails_interfaces
-
 
 # ----------------------------------------------------------------------------
 # specialized common mapper classes
@@ -43,7 +44,6 @@ class sailsValue(CustomModelMixin, Value):
     comment = Column(Unicode)
     example = Column(Unicode)
     contributed_datapoint = Column(Unicode)
-
 
 class FeatureDomain(Base, IdNameDescriptionMixin, Versioned):
     pass
@@ -73,6 +73,23 @@ class Feature(CustomModelMixin, Parameter, Versioned):
     featuredomain = relationship(FeatureDomain, lazy='joined')
     designer_pk = Column(Integer, ForeignKey('designer.pk'))
     designer = relationship(Designer, lazy='joined', backref="features")
+    dependson = Column(String)
+    sortkey_str = Column(String)
+    sortkey_int = Column(Integer)
+
+    def __solr__(self, req):
+        res = Parameter.__solr__(self, req)
+        res.update(featuredomain_t=self.featuredomain.name)
+        return res
+
+@implementer(sails_interfaces.IConstruction)
+class sailsUnitParameter(CustomModelMixin, UnitParameter):
+    pk = Column(Integer, ForeignKey('unitparameter.pk'), primary_key=True)
+    vdoc = Column(String)
+    featuredomain_pk = Column(Integer, ForeignKey('featuredomain.pk'))
+    featuredomain = relationship(FeatureDomain, lazy='joined')
+    designer_pk = Column(Integer, ForeignKey('designer.pk'))
+    designer = relationship(Designer, lazy='joined', backref="sailsunitparameters")
     dependson = Column(String)
     sortkey_str = Column(String)
     sortkey_int = Column(Integer)
