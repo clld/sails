@@ -3,7 +3,7 @@
 <%! active_menu_item = "unitparameters" %>
 
 
-<h2>${_('Unit Parameters')}</h2>
+<h2>${_('Construction Features')}</h2>
 <div>
     ${ctx.render()}
 </div>

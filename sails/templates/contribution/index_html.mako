@@ -6,7 +6,7 @@
 <h2>${_('Authors/Domains')}</h2>
 
 <p>
-SAILS Online is organised by domains. Some domains (NP, ARGEX, TAME) cover
+SAILS Online is organised by domains. Some domains (NP, ARGEX, TAME, SUB) cover
 a certain typological division, while other domains cover a geographical
 area (FFQ, AND, IC) or a specific language family (ARW). Typically one
 author of the team designed the feature sets for each domain,

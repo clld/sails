@@ -16,6 +16,7 @@ from clld.db.models.common import (
     Parameter,
     Contribution,
     Value,
+    Unit,
     UnitValue,
     UnitParameter,
     IdNameDescriptionMixin,
@@ -48,6 +49,9 @@ class sailsValue(CustomModelMixin, Value):
 class FeatureDomain(Base, IdNameDescriptionMixin, Versioned):
     pass
 
+class ConstructionFeatureDomain(Base, IdNameDescriptionMixin, Versioned):
+    pass
+
 
 @implementer(interfaces.IContribution)
 class Designer(CustomModelMixin, Contribution, Versioned):
@@ -57,6 +61,7 @@ class Designer(CustomModelMixin, Contribution, Versioned):
     pk = Column(Integer, ForeignKey('contribution.pk'), primary_key=True)
     domain = Column(Unicode)
     contributor = Column(Unicode)
+    orientation = Column(Unicode)
     pdflink = Column(Unicode)
     citation = Column(Unicode)
     more_information = Column(Unicode)
@@ -82,19 +87,33 @@ class Feature(CustomModelMixin, Parameter, Versioned):
         res.update(featuredomain_t=self.featuredomain.name)
         return res
 
-@implementer(sails_interfaces.IConstruction)
+@implementer(sails_interfaces.IConstructionFeature)
 class sailsUnitParameter(CustomModelMixin, UnitParameter):
     pk = Column(Integer, ForeignKey('unitparameter.pk'), primary_key=True)
     vdoc = Column(String)
-    featuredomain_pk = Column(Integer, ForeignKey('featuredomain.pk'))
-    featuredomain = relationship(FeatureDomain, lazy='joined')
+    constructionfeaturedomain_pk = Column(Integer, ForeignKey('constructionfeaturedomain.pk'))
+    constructionfeaturedomain = relationship(ConstructionFeatureDomain, lazy='joined')
     designer_pk = Column(Integer, ForeignKey('designer.pk'))
     designer = relationship(Designer, lazy='joined', backref="sailsunitparameters")
     dependson = Column(String)
+    nconstructions = Column(Integer)
+    nlanguages = Column(Integer)
     sortkey_str = Column(String)
     sortkey_int = Column(Integer)
 
     def __solr__(self, req):
-        res = Parameter.__solr__(self, req)
-        res.update(featuredomain_t=self.featuredomain.name)
+        res = UnitParameter.__solr__(self, req)
+        res.update(constructionfeaturedomain_t=self.constructionfeaturedomain.name)
         return res
+
+@implementer(sails_interfaces.IConstruction)
+class sailsConstruction(CustomModelMixin, Unit):
+    pk = Column(Integer, ForeignKey('unit.pk'), primary_key=True)
+
+@implementer(interfaces.IUnitValue)
+class sailsUnitValue(CustomModelMixin, UnitValue):
+    pk = Column(Integer, ForeignKey('unitvalue.pk'), primary_key=True)
+    comment = Column(Unicode)
+    source = Column(Unicode)
+    provenance = Column(Unicode)
+    contributed_datapoint = Column(Unicode)

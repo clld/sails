@@ -40,7 +40,7 @@ def savu(txt, fn):
 def dtab(fn="sails_neele.tab", encoding="utf-8"):
     lines = reline.split(loadunicode(fn, encoding="utf-8"))
     lp = [[x.strip() for x in refield.split(l)] for l in lines if l.strip()]
-    topline = lp[0]
+    topline = [lp[0][0][len(u'\ufeff'):] if lp[0][0].startswith(u'\ufeff') else lp[0][0]] + lp[0][1:]
     lpd = [dict(zip(topline, l)) for l in lp[1:]]
     return lpd
 
@@ -202,23 +202,28 @@ def main(args):
     DBSession.flush()
 
     # Designers
-    designer_info = dict([(dd['designer'], dd) for dd in dtab("sailscontributions.tab")])
-    designers = dict([(ld['designer'], ld['feature_domain']) for ld in ldps])
     citation_template = "%s. 2014. %s. In Muysken, Pieter et al. (eds.) "\
     "South American Indian Language Structures (SAILS) Online. Leipzig: Online "\
     "Max Planck Institute of Evolutionary Anthropology. "\
     "(Available at http://sails.clld.org)"
-    for (designer_id, (designer, domain)) in enumerate(designers.iteritems()):
+    #for (designer_id, (designer, domain)) in enumerate(designers.iteritems()):
+    designer_to_id = {}
+    for dd in dtab("sailscontributions.tab"):
+        contributionid = slug("%s-%s" % (dd["designer"], dd["domain"]))
+        orientation = "Language-Based"
+        if dd["domain"].find("Construction-Based") == -1:
+            designer_to_id[dd["designer"]] = contributionid
+            orientation = "Construction-Based"
         data.add(
-            models.Designer, designer,
-            id=str(designer_id),
-            name=designer_id,
-            domain=designer_info[designer]["domain"],
-            contributor=designer,
-            citation=citation_template % (
-                designer,
-                designer_info[designer]["domain"]),
-            more_information=designer_info[designer]["citation"])
+            models.Designer, contributionid,
+            id=contributionid,
+            name=contributionid,
+            domain=dd["domain"],
+            orientation=orientation,
+            contributor=dd["designer"],
+            citation=citation_template % (dd["designer"], dd["domain"]),
+            more_information=dd["citation"],
+            pdflink=dd["pdflink"])
     DBSession.flush()
 
     # Features
@@ -245,7 +250,7 @@ def main(args):
             description=f['feature_information'],
             jsondata=dict(vdoc=f['feature_possible_values']),
             representation=nlgs[fid],
-            designer=data["Designer"][f['designer']],
+            designer=data["Designer"][designer_to_id[f['designer']]],
             dependson=f["depends_on"],
             featuredomain=data['FeatureDomain'][f["feature_domain"]],
             sortkey_str=fidstr[fid],
@@ -315,18 +320,33 @@ def main(args):
         )
         done.add(id_)
 
+    dedup = opv(grp2([((ld['construction_id'], ld['feature_alphanumid'].replace('.', "-")), (ld["value"],) + tuple(ld.items())) for ld in ldcps]), max)
+    cdatapts = [dict(dld[1:]) for dld in dedup.itervalues() if dld[0].strip() and dld[0] != "?"]
+    fccl = grp2([(ld['feature_alphanumid'].replace('.', "-"), (ld['construction_id'], ld['language_id'])) for ld in cdatapts])
+    fcstats = opv(fccl, lambda cls: (len(set([c for (c, l) in cls])), len(set([l for (c, l) in cls]))))
     fcstrs = dict([(ld['feature_alphanumid'].replace('.', "-"), ld) for ld in dtab("constructions_features.tab")])
+
+    # Construction Feature Domains
+    for domain in set(ld['feature_domain'] for ld in fcstrs.values()):
+        data.add(models.ConstructionFeatureDomain, domain, id=slug(domain), name=domain)
+    DBSession.flush()
+
+    
+
     (fidstr, fidint) = sortinfo(fcstrs.keys())
     for (fid, ld) in fcstrs.iteritems():
+        (ncs, nlgs) = fcstats[fid]
         data.add(
             models.sailsUnitParameter, fid,
             id=fid,
             name=ld['feature_name'],
             description=ld['feature_information'],
             jsondata=dict(vdoc=ld['feature_possible_values']),
-            designer=data["Designer"][f['designer']],
+            designer=data["Designer"][slug("%s-%s" % (ld['designer'], "Construction-Based Subordination Data (SUB)"))],
             dependson=f["depends_on"],
-            featuredomain=data['FeatureDomain'][f["feature_domain"]],
+            constructionfeaturedomain=data['ConstructionFeatureDomain'][ld["feature_domain"]],
+            nconstructions=ncs,
+            nlanguages=nlgs,
             sortkey_str=fidstr[fid],
             sortkey_int=fidint[fid])
     DBSession.flush()
@@ -336,29 +356,33 @@ def main(args):
     for (cid, lid) in cs:
         language = data['sailsLanguage'][lid]
         data.add(
-            common.Unit, cid,
+            models.sailsConstruction, cid,
             id=cid,
             name=cid,
             language = language) 
     DBSession.flush()
         
-    #done = set()
-    dedup = opv(grp2([((ld['construction_id'], ld['feature_alphanumid'].replace('.', "-")), (ld["value"],) + tuple(ld.items())) for ld in ldcps]), max)
-    #for (idd, lds) in dups.iteritems():
-    #    if len(lds) > 1:
-    #        print idd, lds
     for dld in dedup.itervalues():
         ld = dict(dld[1:])
         #print fid, ld['language_id'], ld['construction_id'], "HEJ"
         fid = ld['feature_alphanumid'].replace('.', "-")
         language = data['sailsLanguage'][ld['language_id']]
-        construction = data['Unit'][ld['construction_id']]
+        construction = data['sailsConstruction'][ld['construction_id']]
         construction_feature = data['sailsUnitParameter'][fid]
         id_ = '%s-%s' % (construction.id, construction_feature.id)
-        data.add(common.UnitValue, id_, id=id_, name=ld['value'], unit=construction, unitparameter=construction_feature, contribution=construction_feature.designer)
-        #TODO cstrs + cstr_features + languages?
-        #source comment etc
+        print ld
+        data.add(models.sailsUnitValue, id_, id=id_, name=ld['value'], unit=construction, unitparameter=construction_feature, contribution=construction_feature.designer, source = ld["source"], comment = ld["comment"], provenance = ld["provenance"], contributed_datapoint = "Rik van Gijn")
 
+        
+        #1xf vs
+        #contribution??!?!
+        #TODO fixa unitvalues
+	#fs v #lgs #cstrs TODO fixa snippet
+        
+
+        #Constrction Features
+        #(unit-)values
+        
         #done.add(id_)
     DBSession.flush()
 

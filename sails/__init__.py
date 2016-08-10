@@ -60,6 +60,7 @@ def main(global_config, **settings):
         send_mimetype="text/plain",
         extension='tab',
         name='tab-separated values'), IParameter)
-    config.register_resource('construction', models.sailsUnitParameter, IConstruction, with_index=True)
+    #config.register_resource('construction', models.sailsUnit, IUnit, with_index=True)
+    config.register_resource('construction', models.sailsConstruction, IConstruction, with_index=True)
     #config.register_adapter(adapter_factory('family/detail_html.mako'), IFamily)
     return config.make_wsgi_app()
