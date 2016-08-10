@@ -87,7 +87,8 @@ class Feature(CustomModelMixin, Parameter, Versioned):
         res.update(featuredomain_t=self.featuredomain.name)
         return res
 
-@implementer(sails_interfaces.IConstructionFeature)
+
+@implementer(interfaces.IUnitParameter)
 class sailsUnitParameter(CustomModelMixin, UnitParameter):
     pk = Column(Integer, ForeignKey('unitparameter.pk'), primary_key=True)
     vdoc = Column(String)

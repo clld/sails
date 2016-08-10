@@ -18,6 +18,7 @@ from clld.lib.bibtex import Record
 from clldutils.misc import slug
 from clldutils.path import Path
 
+import sails
 from sails import models
 from sails.scripts import issues
 from pyglottolog.api import Glottolog
@@ -27,7 +28,7 @@ DATA_DIR = Path('data')
 reline = re.compile("[\\n\\r]")
 refield = re.compile("\\t")
 
-GLOTTOLOG_REPOS = Path(grambank.__file__).parent.parent.parent.parent.joinpath(
+GLOTTOLOG_REPOS = Path(sails.__file__).parent.parent.parent.parent.joinpath(
     'glottolog3', 'glottolog') \
     if getpass.getuser() in ['robert', 'shh\\forkel'] \
     else Path('C:\\Python27\\glottolog\\')  # add your path to the glottolog repos clone here!

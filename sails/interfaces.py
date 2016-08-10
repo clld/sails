@@ -4,9 +4,6 @@ from zope.interface import Interface
 class IFamily(Interface):
     """marker"""
 
-class IConstructionFeature(Interface):
-    """marker"""
-
 class IConstruction(Interface):
     """marker"""
 
