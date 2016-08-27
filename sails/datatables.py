@@ -1,4 +1,4 @@
-from sqlalchemy.orm import joinedload, joinedload_all
+from sqlalchemy.orm import joinedload, joinedload_all, load_only
 
 from clld.db.meta import DBSession
 from clld.db.models import common
@@ -124,16 +124,40 @@ class Languages(datatables.Languages):
 
 
 class Designers(datatables.Contributions):
+    def __init__(self, dt, name, *args, **kw):
+        self.short = kw.get('short')
+        super(Designers, self).__init__(dt, name, *args, **kw)
+
+    def base_query(self, query):
+        if self.short:
+            return datatables.Contributions.base_query(self, query).options(load_only("domain", "contributor", "nfeatures", "nlanguages", "ndatapoints"))
+        return datatables.Contributions.base_query(self, query)
+   
     def col_defs(self):
+        #print "COL DEFS", self.short
+        if self.short:
+            return [
+            Col(self, 'Domain of Design', model_col=Designer.domain),
+            Col(self, 'Designer', model_col=Designer.contributor),
+            Col(self, 'Features', model_col=Designer.nfeatures),
+            Col(self, 'Languages', model_col=Designer.nlanguages),
+            Col(self, 'Datapoints', model_col=Designer.ndatapoints),    
+        ]
         return [
             Col(self, 'Designer', model_col=Designer.contributor),
             Col(self, 'Domain of Design', model_col=Designer.domain),
             Col(self, 'Citation', model_col=Designer.citation),
+            Col(self, 'Features', model_col=Designer.nfeatures),
+            Col(self, 'Languages', model_col=Designer.nlanguages),
+            Col(self, 'Datapoints', model_col=Designer.ndatapoints),
             Col(self, 'More Information', model_col=Designer.more_information),
             Col(self, 'PDF Link', model_col=Designer.pdflink),
         ]
 
-
+    def get_options(self):
+        if self.short:
+            return {'bLengthChange': False, 'bPaginate': False}
+    
 class Datapoints(Values):
     def base_query(self, query):
         query = Values.base_query(self, query)
@@ -218,7 +242,6 @@ class Constructions(datatables.Units):
 class ConstructionValues(Unitvalues):
     def base_query(self, query):
         query = Unitvalues.base_query(self, query).options(joinedload_all(sailsUnitValue.unitparameter)) #.join(sailsLanguage).options(joinedload(common.UnitValue.unit, sailsConstruction.language))
-        #TODO
         #if self.language:
         #    query = query.options(
         #        joinedload_all(common.Value.valueset, common.ValueSet.parameter),

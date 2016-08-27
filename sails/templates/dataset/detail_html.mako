@@ -1,5 +1,6 @@
 <%inherit file="../home_comp.mako"/>
 <%namespace name="util" file="../util.mako"/>
+<%! from sails.models import Designer %>
 
 <%def name="sidebar()">
 ##<div id="wals_search">
@@ -29,41 +30,32 @@ The South American Indigenous Language Structures (SAILS) is a large database of
 SAILS consists of a number of data subsets (<a href="${request.route_url('contributions')}">domains</a>) for South American languages not all of which are uniform in terms of the languages covered or the design of the data:
 
 <p>
-<table class="table table-condensed">
- <thead>
-<tr>
-<th colspan=2>Domain/Data Subset</th><th>Designer</th><th>Orientation</th><th>Languages</th><th>Features</th><th>Datapoints</th>
-</tr>
-</thead>
-<tr><td>Argument Marking</td><td>ARGEX</td><td>Joshua Birchall</td><td>Language-based</td><td>${stats['language']}</td><td>${stats['parameter']}</td><td>${stats['value']}</td></tr>
-<tr><td>Argument Marking</td><td>ARGEX</td><td>Joshua Birchall</td><td>Language-based</td><td>${stats['language']}</td><td>${stats['parameter']}</td><td>${stats['value']}</td></tr>
-<tr><td>Argument Marking</td><td>ARGEX</td><td>Joshua Birchall</td><td>Language-based</td><td>${stats['language']}</td><td>${stats['parameter']}</td><td>${stats['value']}</td></tr>
-<tr><td>Total</td><td></td><td></td><td></td><td>${stats['language']}</td><td>${stats['parameter']} + stats-unitparameter</td><td>${stats['value']}+stats-unitvalue</td></tr>
-</table>
+
+${request.get_datatable('contributions', Designer, short=True).render()}
+
 </p>
 
 
 Note the following differences among the data subsets:
 <ul>
-<li>
-Some domains (NP, ARGEX, TAME, SUB) cover a certain typological
+<li><b>Domain:</b> Some domains (NP, ARGEX, TAME, SUB) cover a certain typological
 division, while other domains cover a geographical area (FFQ, AND, IC)
 or a specific language family (ARW).
 </li>
 
-<li>
+<li><b>Languages:</b>
 Four datasets (NP, ARGEX, TAME, SUB) span roughly the same sample of
 South American languages, while the other datasets overlap only
 sporadically with the aforementioned set and each other.
 </li>
 
-<li>
+<li><b>Typology:</b>
 All datasets record structural characteristics of languages and one
 dataset (AND) also contains features sensitive to the form of certain
 key morphemes.
 </li>
 
-<li>
+<li><b>Orientation:</b>
 All datasets except one (SUB) are language-based in their design,
 meaning that a language can logically take only one value per
 feature. The subordination (SUB) dataset is construction-based,
@@ -73,6 +65,12 @@ constructions. This difference calls for different browsing capabilities
 in that the language-based features can be found in the menu under Features
 and the construction-based data can be found under Constructions.
 </li>
+
+<li><b>Design space:</b> All features are designed such that the set of possible answers exhaust the logical possibilities for a language.</li>
+
+<li><b>Logical dependencies between features:</b> The NP, ARGEX, TAME, and SUB datasets are designed such that logical dependencies between features are absent except for a controlled kind of dependency with overarching versus specializing features. Such dependencies are indicated in the coding scheme of the feature id where X.1, X.2, .. X.n indicates that features X.1-X.n are logically dependent on the overarching feature X. To obtain only logically independent features one may simply use only the overarching features or use only the specializing features.
+</li>
+
 </ul>
 
 Further information can be found in the descriptions of the individual
@@ -82,7 +80,8 @@ Further information can be found in the descriptions of the individual
 
 <p>
 SAILS Online is a publication, published by the
-${h.external_link('http://www.eva.mpg.de', label='Max Planck Institute for Evolutionary Anthropology')}, by an authored team from the
+${h.external_link('http://http://www.shh.mpg.de', label='Linguistic and Cultural Evolution Group')} at the Max Planck Institute for the Science of Human History, Jena.
+</p>, authored by a team from the
 ${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University Nijmegen')}.
 </p>
 

@@ -148,6 +148,8 @@ def main(args):
     ldps = [dict([(k, v.replace(".", "-") if k in ['feature_alphanumid', 'value'] else v)
                   for (k, v) in ld.iteritems()]) for ld in ldps]
     ldcps = dtab("constructions_data.tab")
+    dedup = opv(grp2([((ld['construction_id'], ld['feature_alphanumid'].replace('.', "-")), (ld["value"],) + tuple(ld.items())) for ld in ldcps]), max)
+    dldps = [dict(dld[1:]) for dld in dedup.itervalues()]
     lgs = dict([(ld['language_id'], ld['language_name'] if ld.has_key('language_name') else iso_to_name[ld['language_id']]) for ld in ldps + ldcps])
     nfeatures = opv(grp2([(ld['language_id'], ld['feature_alphanumid'])
                           for ld in ldps + ldcps if ld["value"] != "?"]), len)
@@ -202,6 +204,23 @@ def main(args):
         data.add(models.FeatureDomain, domain, id=slug(domain), name=domain)
     DBSession.flush()
 
+    designer_to_id = {}
+    for dd in dtab("sailscontributions.tab"):
+        contributionid = slug("%s-%s" % (dd["designer"], dd["domain"]))
+        if dd["domain"].find("Construction-Based") == -1:
+            designer_to_id[dd["designer"]] = contributionid
+    
+    
+    contribution_statistics = {}
+    contribution_statistics["nfeatures"] = opv(grp2([(designer_to_id[ld["designer"]], ld['feature_alphanumid']) for ld in ldps]), len)
+    contribution_statistics["nlanguages"] = opv(grp2([(designer_to_id[ld["designer"]], ld['language_id']) for ld in ldps]), len)
+    contribution_statistics["ndatapoints"] = opv(grp2([(designer_to_id[ld["designer"]], (ld['feature_alphanumid'], ld['language_id'])) for ld in ldps if ld["value"] != "?"]), len)
+
+    contributionid = slug("%s-%s" % ("Rik van Gijn", "Construction-Based Subordination Data (SUB)"))
+    contribution_statistics["nfeatures"][contributionid] = len(set([(ld['feature_alphanumid']) for ld in dldps]))
+    contribution_statistics["nlanguages"][contributionid] = len(set([(ld['language_id']) for ld in dldps]))
+    contribution_statistics["ndatapoints"][contributionid] = len(set([(ld['feature_alphanumid'], ld['language_id']) for ld in ldps if ld["value"] != "?"]))
+
     # Designers
     citation_template = "%s. 2014. %s. In Muysken, Pieter et al. (eds.) "\
     "South American Indian Language Structures (SAILS) Online. Leipzig: Online "\
@@ -222,6 +241,9 @@ def main(args):
             domain=dd["domain"],
             orientation=orientation,
             contributor=dd["designer"],
+            nlanguages=contribution_statistics["nlanguages"][contributionid],
+            nfeatures=contribution_statistics["nfeatures"][contributionid],
+            ndatapoints=contribution_statistics["ndatapoints"][contributionid],
             citation=citation_template % (dd["designer"], dd["domain"]),
             more_information=dd["citation"],
             pdflink=dd["pdflink"])
@@ -239,7 +261,7 @@ def main(args):
 
     nlgs = opv(grp2([(ld['feature_alphanumid'], ld['language_id'])
                      for ld in ldps if ld["value"] != "?"]), len)
-
+    
     (fidstr, fidint) = sortinfo(fs.keys())
     for (fid, f) in fs.iteritems():
         if nlgs[fid] == 0:
@@ -321,7 +343,6 @@ def main(args):
         )
         done.add(id_)
 
-    dedup = opv(grp2([((ld['construction_id'], ld['feature_alphanumid'].replace('.', "-")), (ld["value"],) + tuple(ld.items())) for ld in ldcps]), max)
     cdatapts = [dict(dld[1:]) for dld in dedup.itervalues() if dld[0].strip() and dld[0] != "?"]
     fccl = grp2([(ld['feature_alphanumid'].replace('.', "-"), (ld['construction_id'], ld['language_id'])) for ld in cdatapts])
     fcstats = opv(fccl, lambda cls: (len(set([c for (c, l) in cls])), len(set([l for (c, l) in cls]))))
@@ -362,9 +383,9 @@ def main(args):
             name=cid,
             language = language) 
     DBSession.flush()
-        
-    for dld in dedup.itervalues():
-        ld = dict(dld[1:])
+
+    for ld in dldps: #dld in dedup.itervalues():
+        #ld = dict(dld[1:])
         #print fid, ld['language_id'], ld['construction_id'], "HEJ"
         fid = ld['feature_alphanumid'].replace('.', "-")
         language = data['sailsLanguage'][ld['language_id']]
@@ -372,7 +393,7 @@ def main(args):
         construction_feature = data['sailsUnitParameter'][fid]
         id_ = '%s-%s' % (construction.id, construction_feature.id)
         print ld
-        data.add(models.sailsUnitValue, id_, id=id_, name=ld['value'], unit=construction, unitparameter=construction_feature, contribution=construction_feature.designer, source = ld["source"], comment = ld["comment"], provenance = ld["provenance"], contributed_datapoint = "Rik van Gijn")
+        data.add(models.sailsUnitValue, id_, id=id_, name=ld['value'], unit=construction, unitparameter=construction_feature, contribution=construction_feature.designer, source = ld["source"].strip(), comment = ld["comment"], provenance = ld["provenance"], contributed_datapoint = "Rik van Gijn")
 
         
         #1xf vs
@@ -390,7 +411,7 @@ def main(args):
 
         
     # Sources
-    sources = [ktfbib(bibsource) for ld in ldps if ld.get('bibsources') for bibsource in ld['bibsources'].split(",,,")]
+    sources = [ktfbib(bibsource) for ld in ldps if ld.get('bibsources') for bibsource in ld['bibsources'].split(",,,")] + [ktfbib(bibsource) for dld in dldps if dld.get('bibsources') for bibsource in dld['bibsources'].split(",,,")]
     for (k, (typ, bibdata)) in sources:
         rec = Record(typ, k, **bibdata)
         if not data["Source"].has_key(k):
@@ -413,13 +434,13 @@ def main(args):
     dataset = common.Dataset(
         id="SAILS",
         name='SAILS Online',
-        publisher_name="Max Planck Institute for Evolutionary Anthropology",
-        publisher_place="Leipzig",
-        publisher_url="http://www.eva.mpg.de",
+        publisher_name="Max Planck Institute for the Science of Human History",
+        publisher_url="http://shh.mpg.de",
+        publisher_place="Jena",
         description="Dataset on Typological Features for South American Languages, collected 2009-2013 in the Traces of Contact Project (ERC Advanced Grant 230310) awarded to Pieter Muysken, Radboud Universiteit, Nijmegen, the Netherlands.",
         domain='sails.clld.org',
         published=date(2014, 2, 20),
-        contact='harald.hammarstroem@mpi.nl',
+        contact='harald.hammarstrom@gmail.com',
         license='http://creativecommons.org/licenses/by-nc-nd/2.0/de/deed.en',
         jsondata={
             'license_icon': 'http://wals.info/static/images/cc_by_nc_nd.png',
