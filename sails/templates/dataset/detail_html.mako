@@ -80,8 +80,7 @@ Further information can be found in the descriptions of the individual
 
 <p>
 SAILS Online is a publication, published by the
-${h.external_link('http://http://www.shh.mpg.de', label='Linguistic and Cultural Evolution Group')} at the Max Planck Institute for the Science of Human History, Jena.
-</p>, authored by a team from the
+${h.external_link('http://http://www.shh.mpg.de', label='Linguistic and Cultural Evolution Group')} at the Max Planck Institute for the Science of Human History, Jena, authored by a team from the
 ${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University Nijmegen')}.
 </p>
 
