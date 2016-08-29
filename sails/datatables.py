@@ -124,17 +124,16 @@ class Languages(datatables.Languages):
 
 
 class Designers(datatables.Contributions):
-    def __init__(self, dt, name, *args, **kw):
-        self.short = kw.get('short')
-        super(Designers, self).__init__(dt, name, *args, **kw)
+    def __init__(self, req, *args, **kw):
+        self.short = kw.pop('short', False)
+        if 'short' in req.params:
+            self.short = req.params['short'] == 'True'
+        super(Designers, self).__init__(req, *args, **kw)
 
-    def base_query(self, query):
-        if self.short:
-            return datatables.Contributions.base_query(self, query).options(load_only("domain", "contributor", "nfeatures", "nlanguages", "ndatapoints"))
-        return datatables.Contributions.base_query(self, query)
-   
+    def xhr_query(self):
+        return dict(short=self.short)
+
     def col_defs(self):
-        #print "COL DEFS", self.short
         if self.short:
             return [
             Col(self, 'Domain of Design', model_col=Designer.domain),
