@@ -75,8 +75,9 @@ and the construction-based data can be found under Constructions.
 
 Further information can be found in the descriptions of the individual
 (<a href="${request.route_url('contributions')}">domains</a>). All
-datasets were published online in 2014 except the SUB dataset which was published
-online in 2016.
+datasets were published online in 2014 except the SUB dataset which
+was published online in 2016. SAILS may be thus referred to as SAILS
+2014 and SAILS 2016 accordingly.
 
 </p>
 
