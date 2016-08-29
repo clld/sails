@@ -74,7 +74,9 @@ and the construction-based data can be found under Constructions.
 </ul>
 
 Further information can be found in the descriptions of the individual
-(<a href="${request.route_url('contributions')}">domains</a>).
+(<a href="${request.route_url('contributions')}">domains</a>). All
+datasets were published online in 2014 except the SUB dataset which was published
+online in 2016.
 
 </p>
 
@@ -97,13 +99,13 @@ in the navigation bar.
 <p>
 If you are citing data only from a specific <a href="${request.route_url('contributions')}">domain</a> of SAILS, cite the specific contribution, e.g., for the Noun Phrase (NP) domain:
 <blockquote>
-Olga Krasnoukhova. 2014. Noun Phrase (NP). In Muysken, Pieter et al. (eds.) South American Indian Language Structures (SAILS) Online. Leipzig: Online Max Planck Institute of Evolutionary Anthropology. (Available at http://sails.clld.org)
+Olga Krasnoukhova. 2016. Noun Phrase (NP). In Muysken, Pieter et al. (eds.) South American Indian Language Structures (SAILS) Online. Leipzig: Online Max Planck Institute of Evolutionary Anthropology. (Available at http://sails.clld.org)
 </blockquote>
 </p>
 <p>
 If you are citing all the data, use:
 <blockquote>
-Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn & George Saad. 2014. <I>South American Indigenous Language Structures (SAILS) Online</I>. Leipzig: Online Publication of the Max Planck Institute for Evolutionary Anthropology. (Available at http://sails.clld.org)
+Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn & George Saad. 2016. <I>South American Indigenous Language Structures (SAILS) Online</I>. Leipzig: Online Publication of the Max Planck Institute for Evolutionary Anthropology. (Available at http://sails.clld.org)
 </blockquote>
 </p>
 
