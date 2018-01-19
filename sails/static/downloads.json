@@ -1,0 +1,20 @@
+{
+    "1.0": {
+        "bitstreams": [
+            {
+                "last-modified": 1516351050093,
+                "checksum": "713ba8bb52dc298a23fcdb3de1440e8a",
+                "created": 1516351050045,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "SAILS_dataset.cldf.zip",
+                "filesize": 335265,
+                "content-type": "application/zip"
+            }
+        ],
+        "oid": "EAEA0-20A1-0A94-4429-0",
+        "metadata": {
+            "title": "sails 1.0 - downloads",
+            "creator": "pycdstar"
+        }
+    }
+}
