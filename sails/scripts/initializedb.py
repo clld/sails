@@ -135,7 +135,7 @@ def main(args):
     icons = issues.Icons()
 
     languoids = list(Glottolog(GLOTTOLOG_REPOS).languoids())
-    iso_to_gcs = grp2([(l.iso, l.id) for l in languoids]) #glottocodes = glottocodes_by_isocode(args.glottolog_dburi)
+    iso_to_gc = dict([(l.iso, l.id) for l in languoids]) #glottocodes = glottocodes_by_isocode(args.glottolog_dburi)
     iso_to_name = {l.iso: l.name for l in languoids}
     #Languages
     dp = dtab("dp.tab")
@@ -188,8 +188,8 @@ def main(args):
                 type=common.IdentifierType.iso.value,
                 description=lgs[lgid])
             data.add(common.LanguageIdentifier, lgid, language=lang, identifier=iso)
-        if lgid in iso_to_gcs:
-            gc = iso_to_gcs[lgid]
+        if lgid in iso_to_gc:
+            gc = iso_to_gc[lgid]
             gc = data.add(
                 common.Identifier, 'gc' + lgid,
                 id=gc,
