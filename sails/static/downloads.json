@@ -2,18 +2,18 @@
     "1.0": {
         "bitstreams": [
             {
-                "last-modified": 1516351050093,
-                "checksum": "713ba8bb52dc298a23fcdb3de1440e8a",
-                "created": 1516351050045,
+                "last-modified": 1521190425553,
+                "checksum": "661014b2873005bb22d55cb13809f65e",
+                "created": 1521190425538,
                 "checksum-algorithm": "MD5",
                 "bitstreamid": "SAILS_dataset.cldf.zip",
-                "filesize": 335265,
+                "filesize": 285193,
                 "content-type": "application/zip"
             }
         ],
-        "oid": "EAEA0-20A1-0A94-4429-0",
+        "oid": "EAEA0-0A75-A1F1-F344-0",
         "metadata": {
-            "title": "sails 1.0 - downloads",
+            "title": "sails 2018 - downloads",
             "creator": "pycdstar"
         }
     }
