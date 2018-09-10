@@ -159,7 +159,7 @@ Note the following differences among the data subsets:
             <img src="https://erc.europa.eu/sites/default/files/content/LOGO-ERC.jpg"
                  alt="https://erc.europa.eu" width="104" height="142">
         </td>
- ##        <td>
- ##           <img src="http://www.ru.nl/publish/pages/610085/ru_nl_a4_pms.jpg" alt="http://www.ru.nl" width="204">
- ##        </td>
-</table> 
+         <td>
+         <img src="https://www.ru.nl/publish/pages/729142/ru_nl_a4_rgb_2017_lustum95.jpg" width="250">
+         </td>
+</table>
