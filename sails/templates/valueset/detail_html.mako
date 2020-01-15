@@ -14,7 +14,7 @@ ${h.text2html(h.Markup(ctx.markup_description) if ctx.markup_description else ct
 <div style="clear: right;">
     <h4>
         ${h.map_marker_img(request, value)}
-        ${value.__unicode__()} - ${value.domainelement.description}
+        ${str(value)} - ${value.domainelement.description}
         ${h.format_frequency(request, value)}
     </h4>
 </div>
