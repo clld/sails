@@ -2,23 +2,6 @@
 <%namespace name="util" file="../util.mako"/>
 <%! from sails.models import Designer %>
 
-<%def name="sidebar()">
-##<div id="wals_search">
-##<script>
-##(function() {
-##var cx = '012093784907070887713:a7i_0y3rwgs';
-##var gcse = document.createElement('script');
-##gcse.type = 'text/javascript';
-##gcse.async = true;
-##gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
-##'//www.google.com/cse/cse.js?cx=' + cx;
-##var s = document.getElementsByTagName('script')[0];
-##s.parentNode.insertBefore(gcse, s);
-##})();
-##</script>
-##<gcse:search></gcse:search>
-##</div>
-</%def>
 
 <h2>Welcome to SAILS Online</h2>
 
@@ -26,7 +9,8 @@
     The South American Indigenous Language Structures (SAILS) is a large database of
     grammatical properties of languages gathered from descriptive materials (such as
     reference grammars) by a team directed by Pieter Muysken. SAILS Online was programmed
-    by Harald Hammarstr&ouml;m using the CLLD framework, with support from Robert Forkel.
+    by Harald Hammarstr&ouml;m using the
+    <span style="font-family: monospace">clld</span> framework, with support from Robert Forkel.
 </p>
 
 <p>
@@ -34,12 +18,10 @@
         href="${request.route_url('contributions')}">domains</a>) for South American
     languages not all of which are uniform in terms of the languages covered or the design
     of the data:
-
-<p>
-
-    ${request.get_datatable('contributions', Designer, short=True).render()}
-
 </p>
+<div>
+    ${request.get_datatable('contributions', Designer, short=True).render()}
+</div>
 
 
 Note the following differences among the data subsets:
@@ -87,7 +69,7 @@ Note the following differences among the data subsets:
 
 </ul>
 
-<P>
+<p>
     Further information can be found in the descriptions of the individual
     (<a href="${request.route_url('contributions')}">domains</a>). All
     datasets were published online in 2014 except the SUB dataset which
@@ -101,8 +83,7 @@ Note the following differences among the data subsets:
     ${h.external_link('http://http://www.shh.mpg.de', label='Linguistic and Cultural Evolution Group')}
     at the Max Planck Institute for the Science of Human History, Jena, authored by a team
     from the
-    ${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University Nijmegen')}
-    .
+    ${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University Nijmegen')}.
 </p>
 
 <h3>How to use SAILS Online</h3>
@@ -123,8 +104,8 @@ Note the following differences among the data subsets:
 </p>
 <blockquote>
     Olga Krasnoukhova. 2016. Noun Phrase (NP). In Muysken, Pieter et al. (eds.) South
-    American Indian Language Structures (SAILS) Online. Leipzig: Online Max Planck
-    Institute of Evolutionary Anthropology. (Available at http://sails.clld.org)
+    American Indian Language Structures (SAILS) Online. Jena: Max Planck
+    Institute for the Science of Human History. (Available at https://sails.clld.org)
 </blockquote>
 <p>
     If you are citing all the data, use:
@@ -132,9 +113,9 @@ Note the following differences among the data subsets:
 <blockquote>
     Muysken, Pieter, Harald Hammarstr&ouml;m, Olga Krasnoukhova, Neele M&uuml;ller, Joshua
     Birchall, Simon van de Kerke, Loretta O'Connor, Swintha Danielsen, Rik van Gijn &
-    George Saad. 2016. <I>South American Indigenous Language Structures (SAILS) Online</I>.
-    Leipzig: Online Publication of the Max Planck Institute for Evolutionary Anthropology.
-    (Available at http://sails.clld.org)
+    George Saad. 2016. <i>South American Indigenous Language Structures (SAILS) Online</i>.
+    Jena: Max Planck Institute for the Science of Human History.
+    (Available at https://sails.clld.org)
 </blockquote>
 
 <h3>Terms of use</h3>
@@ -149,17 +130,19 @@ Note the following differences among the data subsets:
 <p>
     SAILS Online was supported by funding from ERC, KNAW and Radboud University Nijmegen.
 </p>
-<table>
-    <tr>
-        <td>
-            <img src="https://www.knaw.nl/nl/de-knaw/organisatie/shared/resources/images/KNAW_100pt_RGB.jpg"
-                 alt="https://www.knaw.nl" width="304">
-        </td>
-        <td>
-            <img src="https://erc.europa.eu/sites/default/files/content/LOGO-ERC.jpg"
-                 alt="https://erc.europa.eu" width="104" height="142">
-        </td>
-         <td>
-         <img src="https://www.ru.nl/publish/pages/729142/ru_nl_a4_rgb_2017_lustum95.jpg" width="250">
-         </td>
-</table>
+<div class="span12">
+    <table width="100%">
+        <tr>
+            <td style="text-align: center" width="33%">
+                <img src="${req.static_url('sails:static/KNAW_100pt_RGB.jpg')}"
+                     alt="https://www.knaw.nl" width="304">
+            </td>
+            <td style="text-align: center" width="33%">
+                <img src="${req.static_url('sails:static/LOGO-ERC.jpg')}"
+                     alt="https://erc.europa.eu" width="104" height="142">
+            </td>
+            <td style="text-align: center" width="33%">
+                <img src="${req.static_url('sails:static/ru_nl.svg')}" width="250">
+            </td>
+    </table>
+</div>
