@@ -45,8 +45,10 @@ class sailsValue(CustomModelMixin, Value):
     example = Column(Unicode)
     contributed_datapoint = Column(Unicode)
 
+
 class FeatureDomain(Base, IdNameDescriptionMixin):
     pass
+
 
 class ConstructionFeatureDomain(Base, IdNameDescriptionMixin):
     pass
@@ -84,11 +86,6 @@ class Feature(CustomModelMixin, Parameter):
     sortkey_str = Column(String)
     sortkey_int = Column(Integer)
 
-    def __solr__(self, req):
-        res = Parameter.__solr__(self, req)
-        res.update(featuredomain_t=self.featuredomain.name)
-        return res
-
 
 @implementer(interfaces.IUnitParameter)
 class sailsUnitParameter(CustomModelMixin, UnitParameter):
@@ -104,14 +101,11 @@ class sailsUnitParameter(CustomModelMixin, UnitParameter):
     sortkey_str = Column(String)
     sortkey_int = Column(Integer)
 
-    def __solr__(self, req):
-        res = UnitParameter.__solr__(self, req)
-        res.update(constructionfeaturedomain_t=self.constructionfeaturedomain.name)
-        return res
 
 @implementer(sails_interfaces.IConstruction)
 class sailsConstruction(CustomModelMixin, Unit):
     pk = Column(Integer, ForeignKey('unit.pk'), primary_key=True)
+
 
 @implementer(interfaces.IUnitValue)
 class sailsUnitValue(CustomModelMixin, UnitValue):

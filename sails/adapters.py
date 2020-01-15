@@ -1,26 +1,10 @@
 from sqlalchemy.orm import joinedload
-from clld.interfaces import ILanguage, IParameter, IIndex, IValue, ICldfConfig
+from clld.interfaces import ILanguage, IParameter, IIndex, IValue
 from clld.web.adapters.base import Index
 from clld.web.adapters.geojson import GeoJsonParameter
-from clld.web.adapters.cldf import CldfConfig
 from clld.web.maps import SelectedLanguagesMap
 from clld.db.meta import DBSession
 from clld.db.models.common import Value, ValueSet, DomainElement
-
-
-class SAILSCldfConfig(CldfConfig):
-    module = 'StructureDataset'
-
-    def convert(self, model, item, req):
-        res = CldfConfig.convert(self, model, item, req)
-
-        if model == DomainElement:
-            res['ID'] = res['ID'].replace('N/A', 'NA').replace('?', 'NN')
-
-        if model == Value:
-            res['Code_ID'] = res['Code_ID'].replace('N/A', 'NA').replace('?', 'NN')
-
-        return res
 
 
 class GeoJsonFeature(GeoJsonParameter):
@@ -72,7 +56,6 @@ class ValueMapView(MapView):
 
 
 def includeme(config):
-    config.registry.registerUtility(SAILSCldfConfig(), ICldfConfig)
     config.register_adapter(GeoJsonFeature, IParameter)
     config.register_adapter(MapView, ILanguage, IIndex)
     config.register_adapter(ValueMapView, IValue, IIndex)
