@@ -7,6 +7,7 @@ from clld.web import datatables
 from clld.web.datatables.base import Col, LinkCol, DetailsRowLinkCol, IdCol, LinkToMapCol
 from clld.web.datatables.value import Values, ValueNameCol, RefsCol
 from clld.web.datatables.unitvalue import Unitvalues, UnitValueNameCol
+from clld.web.util.helpers import external_link
 
 from sails.models import (
     ConstructionFeatureDomain, FeatureDomain, Feature, sailsLanguage, Family, Designer,
@@ -127,6 +128,15 @@ class Languages(datatables.Languages):
         ]
 
 
+class MoreInfo(Col):
+    __kw__ = {'bSortable': False, 'bSearchable': False}
+
+    def format(self, item):
+        if item.pdflink:
+            return external_link(item.pdflink, label=item.more_information)
+        return item.more_information
+
+
 class Designers(datatables.Contributions):
     def __init__(self, req, *args, **kw):
         self.short = kw.pop('short', False)
@@ -150,17 +160,17 @@ class Designers(datatables.Contributions):
             Col(self, 'Designer', model_col=Designer.contributor),
             Col(self, 'Domain of Design', model_col=Designer.domain),
             Col(self, 'Citation', model_col=Designer.citation),
-            Col(self, 'Features', model_col=Designer.nfeatures),
-            Col(self, 'Languages', model_col=Designer.nlanguages),
-            Col(self, 'Datapoints', model_col=Designer.ndatapoints),
-            Col(self, 'More Information', model_col=Designer.more_information),
-            Col(self, 'PDF Link', model_col=Designer.pdflink),
+            Col(self, 'Features', model_col=Designer.nfeatures, input_size='mini'),
+            Col(self, 'Languages', model_col=Designer.nlanguages, input_size='mini'),
+            Col(self, 'Datapoints', model_col=Designer.ndatapoints, input_size='mini'),
+            MoreInfo(self, 'More Information'),
         ]
 
     def get_options(self):
         if self.short:
             return {'bLengthChange': False, 'bPaginate': False}
-    
+
+
 class Datapoints(Values):
     def base_query(self, query):
         query = Values.base_query(self, query)
