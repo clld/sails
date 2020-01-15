@@ -1,7 +1,6 @@
-# coding: utf8
 import re
 
-from sqlalchemy.orm import joinedload_all, joinedload
+from sqlalchemy.orm import joinedload
 
 from clld import RESOURCES
 from clld.db.meta import DBSession
@@ -11,7 +10,7 @@ from clld.web.util.multiselect import CombinationMultiSelect
 from clld.web.icon import ICON_MAP
 from clld.db.models.common import Source
 
-from sails.maps import CombinedMap, LanguageMap
+from sails.maps import LanguageMap
 from sails.models import sailsValue, sailsLanguage
 
 
@@ -36,7 +35,7 @@ def _valuesets(parameter):
         .filter(ValueSet.parameter_pk == parameter.pk)\
         .options(
             joinedload(ValueSet.language),
-            joinedload_all(ValueSet.values, sailsValue.domainelement))
+            joinedload(ValueSet.values).joinedload(sailsValue.domainelement))
 
 
 def parameter_detail_html(context=None, request=None, **kw):
@@ -45,7 +44,7 @@ def parameter_detail_html(context=None, request=None, **kw):
 
 def parameter_detail_tab(context=None, request=None, **kw):
     query = _valuesets(context).options(
-        joinedload_all(ValueSet.language, sailsLanguage.family))
+        joinedload(ValueSet.language).joinedload(sailsLanguage.family))
     return dict(datapoints=query)
 
 

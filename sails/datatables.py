@@ -1,4 +1,4 @@
-from sqlalchemy.orm import joinedload, joinedload_all, load_only
+from sqlalchemy.orm import joinedload
 
 from clld.db.meta import DBSession
 from clld.db.models import common
@@ -7,13 +7,16 @@ from clld.web import datatables
 from clld.web.datatables.base import Col, LinkCol, DetailsRowLinkCol, IdCol, LinkToMapCol
 from clld.web.datatables.value import Values, ValueNameCol, RefsCol
 from clld.web.datatables.unitvalue import Unitvalues, UnitValueNameCol
-#UnitValues, 
 
-from sails.models import ConstructionFeatureDomain, FeatureDomain, Feature, sailsLanguage, Family, Designer, sailsUnitParameter, sailsConstruction, sailsUnitValue, sailsValue
+from sails.models import (
+    ConstructionFeatureDomain, FeatureDomain, Feature, sailsLanguage, Family, Designer,
+    sailsUnitParameter, sailsUnitValue, sailsValue,
+)
 
 class ConstructionFeatures(datatables.Unitparameters):
     def base_query(self, query):
-        return query.join(ConstructionFeatureDomain).options(joinedload_all(sailsUnitParameter.constructionfeaturedomain))
+        return query.join(ConstructionFeatureDomain).options(
+            joinedload(sailsUnitParameter.constructionfeaturedomain))
     
     def col_defs(self):
         return [
@@ -22,7 +25,6 @@ class ConstructionFeatures(datatables.Unitparameters):
             ConstructionFeatureDomainCol(self, 'Domain'),
             Col(self, '# Constructions', model_col=sailsUnitParameter.nconstructions),
             Col(self, '# Languages', model_col=sailsUnitParameter.nlanguages),
-            #DetailsRowLinkCol(self, 'd', button_text='Values'),
         ]
 
 
@@ -76,14 +78,16 @@ class FeatureDomainCol(_FeatureDomainCol):
     def format(self, item):
         return item.featuredomain.name
 
+
 class ConstructionFeatureDomainCol(_ConstructionFeatureDomainCol):
     def format(self, item):
         return item.constructionfeaturedomain.name
 
+
 class Features(datatables.Parameters):
     def base_query(self, query):
-        return query.join(Designer).options(joinedload_all(Feature.designer))\
-            .join(FeatureDomain).options(joinedload_all(Feature.featuredomain))
+        return query.join(Designer).options(joinedload(Feature.designer))\
+            .join(FeatureDomain).options(joinedload(Feature.featuredomain))
 
     def col_defs(self):
         return [
@@ -111,7 +115,7 @@ class FamilyCol(Col):
 
 class Languages(datatables.Languages):
     def base_query(self, query):
-        return query.join(Family).options(joinedload_all(sailsLanguage.family)).distinct()
+        return query.join(Family).options(joinedload(sailsLanguage.family)).distinct()
 
     def col_defs(self):
         return [
@@ -162,15 +166,14 @@ class Datapoints(Values):
         query = Values.base_query(self, query)
         if self.language:
             query = query.options(
-                joinedload_all(common.Value.valueset, common.ValueSet.parameter),
+                joinedload(common.Value.valueset).joinedload(common.ValueSet.parameter),
                 joinedload(common.Value.domainelement),
             )
         elif self.parameter:
-            query = query.outerjoin(Family)\
-                .options(joinedload_all(
-                    common.Value.valueset,
-                    common.ValueSet.language,
-                    sailsLanguage.family))
+            query = query.outerjoin(Family).options(
+                joinedload(common.Value.valueset)
+                .joinedload(common.ValueSet.language)
+                .joinedload(sailsLanguage.family))
         return query
 
     def col_defs(self):
@@ -222,36 +225,19 @@ class Datapoints(Values):
             return {'bLengthChange': False, 'bPaginate': False}
 
 class Constructions(datatables.Units):
-    #def base_query(self, query):
-    #    query = query.join(Language).options(joinedload(Unit.language))
-
-    #    if self.language:
-    #        return query.filter(Unit.language == self.language)
-    #    return query
 
     def col_defs(self):
         return [
             LinkCol(
                 self, 'language', model_col=common.Language.name, get_obj=lambda i: i.language),
             LinkCol(self, 'construction name'),
-            #DescriptionLinkCol(self, 'description'),
         ]
 
 
 class ConstructionValues(Unitvalues):
     def base_query(self, query):
-        query = Unitvalues.base_query(self, query).options(joinedload_all(sailsUnitValue.unitparameter)) #.join(sailsLanguage).options(joinedload(common.UnitValue.unit, sailsConstruction.language))
-        #if self.language:
-        #    query = query.options(
-        #        joinedload_all(common.Value.valueset, common.ValueSet.parameter),
-        #        joinedload(common.Value.domainelement),
-        #    )
-        #elif self.unitparameter:
-        #    query = query.outerjoin(Family)\
-        #        .options(joinedload_all(
-        #            common.Value.valueset,
-        #            common.ValueSet.language,
-        #            sailsLanguage.family))
+        query = Unitvalues.base_query(self, query).options(
+            joinedload(sailsUnitValue.unitparameter))
         return query
 
     def col_defs(self):
@@ -259,8 +245,6 @@ class ConstructionValues(Unitvalues):
         if self.unitparameter and self.unitparameter.domain:
             name_col.choices = sorted([de.name for de in self.unitparameter.domain])
         return [
-            #LinkCol(
-            #    self, 'language', model_col=sailsLanguage.name, get_obj=lambda i: i.unit.language.name),
             LinkCol(self, 'Construction', get_obj=lambda i: i.unit, model_col=common.Unit.name),
             ConstructionFeatureIdCol(self, 'Feature Id', sClass='left', model_col=sailsUnitParameter.id, get_obj=lambda i: i.unitparameter),
             LinkCol(self, 'Feature', get_obj=lambda i: i.unitparameter, model_col=common.UnitParameter.name),

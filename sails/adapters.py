@@ -1,6 +1,4 @@
-from __future__ import unicode_literals
-
-from sqlalchemy.orm import joinedload, joinedload_all
+from sqlalchemy.orm import joinedload
 from clld.interfaces import ILanguage, IParameter, IIndex, IValue, ICldfConfig
 from clld.web.adapters.base import Index
 from clld.web.adapters.geojson import GeoJsonParameter
@@ -30,7 +28,7 @@ class GeoJsonFeature(GeoJsonParameter):
         return DBSession.query(Value).join(DomainElement)\
             .filter(DomainElement.id == req.params.get('domainelement'))\
             .options(
-                joinedload_all(Value.valueset, ValueSet.language),
+                joinedload(Value.valueset).joinedload(ValueSet.language),
                 joinedload(Value.domainelement),
             )
 

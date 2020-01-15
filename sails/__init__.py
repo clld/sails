@@ -1,4 +1,4 @@
-import re
+import itertools
 
 from pyramid.config import Configurator
 from clld.interfaces import (
@@ -6,18 +6,22 @@ from clld.interfaces import (
 )
 from clld.web.adapters.base import adapter_factory
 from clld.web.icon import Icon
-from clldutils.path import Path
-
 
 # we must make sure custom models are known at database initialization!
 from sails import models
 from sails.interfaces import IConstruction
+
+COLORS = [
+    '0000dd', '000000', '66ff33', '99ffff', '009900', '9999ff', '990099', 'aa0000', 'cccccc',
+    'dd0000', 'ff66ff', 'ff4400', 'ff6600', 'ffcc00', 'ffff00', 'ffffcc', 'ffffff']
+SHAPES = list('cdfst')
 
 
 _ = lambda s: s
 _('Parameters')
 _('Parameter')
 _('Contributions')
+
 
 def map_marker(ctx, req):
     """to allow for user-selectable markers, we have to look up a possible custom
@@ -40,15 +44,7 @@ def map_marker(ctx, req):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    convert = lambda spec: ''.join(c if i == 0 else c + c for i, c in enumerate(spec))
-    filename_pattern = re.compile('(?P<spec>(c|d|s|f|t)[0-9a-f]{3})\.png')
-    icons = []
-    for name in sorted(
-            [fn.name for fn in
-             Path(__file__).parent.joinpath('static', 'icons').glob('*.png')]):
-        m = filename_pattern.match(name)
-        if m:
-            icons.append(Icon(convert(m.group('spec'))))
+    icons = [Icon(s + c) for s, c in itertools.product(SHAPES, COLORS)]
 
     config = Configurator(settings=settings)
     config.include('clldmpg')
@@ -60,7 +56,5 @@ def main(global_config, **settings):
         send_mimetype="text/plain",
         extension='tab',
         name='tab-separated values'), IParameter)
-    #config.register_resource('construction', models.sailsUnit, IUnit, with_index=True)
     config.register_resource('construction', models.sailsConstruction, IConstruction, with_index=True)
-    #config.register_adapter(adapter_factory('family/detail_html.mako'), IFamily)
     return config.make_wsgi_app()

@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+
 setup(
     name='sails',
     version='0.0',
@@ -19,8 +20,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clld>=4.2.2',
-        'clldmpg>=3.3.1',
+        'clld>=6.0.0',
+        'clldmpg>=3.5',
         'sqlalchemy',
         'waitress',
     ],
@@ -32,8 +33,8 @@ setup(
         'test': [
             'mock',
             'psycopg2',
-            'pytest>=3.1',
-            'pytest-clld',
+            'pytest>=3.6',
+            'pytest-clld>=1.0',
             'pytest-mock',
             'pytest-cov',
             'coverage>=4.2',
@@ -42,7 +43,12 @@ setup(
         ],
     },
     test_suite="sails",
-    entry_points="""\
-      [paste.app_factory]
-      main = sails:main
-      """)
+    entry_points={
+        'console_scripts': [
+            'sails-app=sails.__main__:main',
+        ],
+        'paste.app_factory': [
+            'main = sails:main',
+        ],
+    },
+)
