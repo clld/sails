@@ -23,6 +23,7 @@ pytest_plugins = ['clld']
         ('get_dt', '/values?language=qux'),
         ('get_html', '/values.map.html?parameter=AND1&sEcho=1'),
         ('get_html', '/valuesets/ARGEX2-12-xwa'),
+        ('get_html', '/values/NP221-cub'),
     ])
 def test_pages(app, method, path):
     getattr(app, method)(path)
