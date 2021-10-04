@@ -20,8 +20,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clld>=6.0.0',
-        'clldmpg>=3.5',
+        'clld>=8.0.0',
+        'clldmpg>=4.2',
         'sqlalchemy',
         'waitress',
     ],
@@ -44,9 +44,6 @@ setup(
     },
     test_suite="sails",
     entry_points={
-        'console_scripts': [
-            'sails-app=sails.__main__:main',
-        ],
         'paste.app_factory': [
             'main = sails:main',
         ],
