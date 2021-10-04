@@ -34,7 +34,7 @@ def typed(r, t):  # pragma: no cover
 
 
 def main(args):  # pragma: no cover
-    repos = args.repos
+    repos = args.cldf.directory.parent
     def iterrows(core, extended=False):
         res = collections.OrderedDict()
         for row in reader(repos / 'raw' / core, dicts=True):
