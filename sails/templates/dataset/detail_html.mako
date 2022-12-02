@@ -80,10 +80,9 @@ Note the following differences among the data subsets:
 
 <p>
     SAILS Online is a publication, published by the
-    ${h.external_link('http://http://www.shh.mpg.de', label='Linguistic and Cultural Evolution Group')}
-    at the Max Planck Institute for the Science of Human History, Jena, authored by a team
-    from the
-    ${h.external_link('http://www.ru.nl/linc/', label='Languages in Contact Group (LinC) at Radboud University Nijmegen')}.
+    ${h.external_link('http://http://www.eva.mpg.de', label='Department of Linguistic and Cultural Evolution')}
+    at the Max Planck Institute for Evolutionary Anthropology, Leipzig, authored by a team
+    from the Languages in Contact Group (LinC) at Radboud University Nijmegen.
 </p>
 
 <h3>How to use SAILS Online</h3>
