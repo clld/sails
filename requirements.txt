@@ -76,7 +76,7 @@ rpds-py==2026.6.3
 -e git+https://github.com/clld/sails@d8fd5f5335923d6d022acf0451b89903a8ef8586#egg=sails
 segments==2.4.0
 selenium==4.49.0
-setuptools==80.10.2
+setuptools==84.1.0
 simplepybtex==0.1.0
 six==1.17.0
 smmap==5.0.3
