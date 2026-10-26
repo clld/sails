@@ -3,7 +3,7 @@ babel==2.18.0
 beautifulsoup4==4.15.0
 bibtexparser==2.0.1
 bs4==0.0.2
-certifi==2026.7.22
+certifi==2026.10.19
 charset-normalizer==3.5.2
 cldfbench==2.0.1
 -e git+https://github.com/cldf-datasets/sails@cd71df24426e08e6894457990b7973786660c6c5#egg=cldfbench_sails
