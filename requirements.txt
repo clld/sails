@@ -57,7 +57,7 @@ rfc3986==1.5.0
 rpds-py==2026.9.1
 -e git+https://github.com/clld/sails@e80509df86ca6cf7b7ede0278cb8e69e7b1d94d7#egg=sails
 selenium==4.52.0
-setuptools==80.10.2
+setuptools==84.1.0
 simplepybtex==0.1.0
 six==1.17.0
 sniffio==1.3.1
