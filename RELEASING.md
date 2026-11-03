@@ -2,6 +2,7 @@
 
 ```shell
 git clone https://github.com/clld/sails
+git clone --branch v2014.1 --depth 1 https://github.com/cldf-datasets/sails sails-cldf
 cd sails
 pip install -e .[test]
 ```
@@ -19,9 +20,7 @@ pip freeze > requirements.txt
 
 Store a db dump:
 ```shell
-pg_dump -xO sails > sails.sql
-zip sails.sql.zip sails.sql
-rm sails.sql
+pg_dump -xO --compress gzip:9 sails > sails.sql.gz
 ```
 
 
