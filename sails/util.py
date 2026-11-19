@@ -44,7 +44,7 @@ def _valuesets(parameter):
         .filter(ValueSet.parameter_pk == parameter.pk)\
         .options(
             joinedload(ValueSet.language),
-            joinedload(ValueSet.values).joinedload(sailsValue.domainelement))
+            joinedload(ValueSet.values.of_type(sailsValue)).joinedload(sailsValue.domainelement))
 
 
 def parameter_detail_html(context=None, request=None, **kw):
@@ -53,7 +53,7 @@ def parameter_detail_html(context=None, request=None, **kw):
 
 def parameter_detail_tab(context=None, request=None, **kw):
     query = _valuesets(context).options(
-        joinedload(ValueSet.language).joinedload(sailsLanguage.family))
+        joinedload(ValueSet.language.of_type(sailsLanguage)).joinedload(sailsLanguage.family)).all()
     return dict(datapoints=query)
 
 

@@ -182,7 +182,7 @@ class Datapoints(Values):
         elif self.parameter:
             query = query.outerjoin(Family).options(
                 joinedload(common.Value.valueset)
-                .joinedload(common.ValueSet.language)
+                .joinedload(common.ValueSet.language.of_type(sailsLanguage))
                 .joinedload(sailsLanguage.family))
         return query
 
