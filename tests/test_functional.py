@@ -5,6 +5,7 @@ import pytest
     "method,path",
     [
         ('get_html', '/'),
+        ('get_html', '/download'),
         ('get', '/parameters/AND2.tab'),
         ('get_dt', '/unitparameters'),
         ('get_dt', '/unitvalues'),
